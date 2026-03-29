@@ -1,0 +1,60 @@
+project:
+  name: "newspaper-bias-audit"
+
+corpus:
+  raw_pdf_dir: "data/raw/pdfs"
+  processed_text_dir: "data/processed/text"
+  article_glob: "*.pdf"
+  language: "german"
+  default_encoding: "utf-8"
+
+metadata:
+  sidecar_csv_path: "data/raw/article_metadata.csv"
+  id_column: "article_id"
+
+preprocessing:
+  normalize_unicode: true
+  lowercase: true
+  collapse_whitespace: true
+  strip_punctuation: false
+  strip_digits: false
+  min_token_length: 2
+  stopword_handling: "keep"
+  ocr_cleanup: true
+
+embeddings:
+  path: "models/embeddings.kv"
+  format: "keyedvectors"
+  binary: false
+  model_name: "newspaper-keyedvectors"
+
+output:
+  manifest_path: "data/processed/articles_manifest.csv"
+  reports_dir: "reports"
+
+analysis:
+  target_groups:
+    migration_groups: ["migrant", "migranten", "migrantin", "migrantinnen", "flüchtling", "flüchtlinge", "geflüchtete"]
+    roma_people: ["roma", "romnja", "sinti", "sintize", "romani"]
+  framing_lexicons:
+    dehumanizing: ["flut", "welle", "plage", "parasiten", "ungeziefer", "invasion"]
+    criminalizing: ["illegal", "kriminalität", "kriminell", "bande", "bedrohung", "verdächtig"]
+    victimizing: ["opfer", "schutzlos", "vertrieben", "leidend", "hilflos"]
+    humanizing: ["familie", "arbeiter", "gemeinschaft", "nachbar", "mensch", "menschen"]
+  context_window_tokens: 8
+  outputs:
+    sentence_features_path: "reports/sentence_representation_features.csv"
+    article_group_features_path: "reports/article_group_representation_features.csv"
+
+wefe:
+  word_sets:
+    career_words: ["career", "executive", "professional"]
+    family_words: ["family", "home", "children"]
+    male_terms: ["man", "male", "he"]
+    female_terms: ["woman", "female", "she"]
+  experiments:
+    gender_career_bias:
+      metric: "WEAT"
+      description: "Compare career and family framing against gendered terms."
+      target_sets: ["career_words", "family_words"]
+      attribute_sets: ["male_terms", "female_terms"]

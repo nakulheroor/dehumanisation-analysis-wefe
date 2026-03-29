@@ -1,0 +1,125 @@
+from pathlib import Path
+
+import pytest
+from pydantic import ValidationError
+
+from wefe_news_analysis.config import ProjectConfig
+
+
+def valid_config_yaml() -> str:
+    return "\n".join(
+        [
+            "project:",
+            '  name: "demo"',
+            "corpus:",
+            '  raw_pdf_dir: "data/raw/pdfs"',
+            '  processed_text_dir: "data/processed/text"',
+            '  article_glob: "*.pdf"',
+            '  language: "german"',
+            '  default_encoding: "utf-8"',
+            "metadata:",
+            '  sidecar_csv_path: "data/raw/article_metadata.csv"',
+            '  id_column: "article_id"',
+            "preprocessing:",
+            "  normalize_unicode: true",
+            "  lowercase: true",
+            "  collapse_whitespace: true",
+            "  strip_punctuation: false",
+            "  strip_digits: false",
+            "  min_token_length: 2",
+            '  stopword_handling: "keep"',
+            "  ocr_cleanup: true",
+            "embeddings:",
+            '  path: "models/embeddings.kv"',
+            '  format: "keyedvectors"',
+            "  binary: false",
+            '  model_name: "demo-model"',
+            "output:",
+            '  manifest_path: "data/processed/articles_manifest.csv"',
+            '  reports_dir: "reports"',
+            "analysis:",
+            "  target_groups:",
+            '    migration_groups: ["migrant", "migranten", "flüchtlinge"]',
+            "  framing_lexicons:",
+            '    dehumanizing: ["flut", "parasiten"]',
+            '    humanizing: ["mensch", "gemeinschaft"]',
+            "  context_window_tokens: 8",
+            "  outputs:",
+            '    sentence_features_path: "reports/sentence_representation_features.csv"',
+            '    article_group_features_path: "reports/article_group_representation_features.csv"',
+            "wefe:",
+            "  word_sets:",
+            '    career_words: ["career", "executive"]',
+            '    family_words: ["family", "home"]',
+            '    male_terms: ["man", "male"]',
+            '    female_terms: ["woman", "female"]',
+            "  experiments:",
+            "    gender_career_bias:",
+            '      metric: "WEAT"',
+            '      description: "demo experiment"',
+            '      target_sets: ["career_words", "family_words"]',
+            '      attribute_sets: ["male_terms", "female_terms"]',
+        ]
+    )
+
+
+def test_project_config_from_yaml(tmp_path: Path) -> None:
+    config_path = tmp_path / "project.yaml"
+    config_path.write_text(valid_config_yaml(), encoding="utf-8")
+
+    config = ProjectConfig.from_yaml(config_path)
+
+    assert config.project.name == "demo"
+    assert config.corpus.language == "german"
+    assert config.metadata.sidecar_csv_path == Path("data/raw/article_metadata.csv")
+    assert config.embeddings.model_name == "demo-model"
+    assert "migration_groups" in config.analysis.target_groups
+    assert "gender_career_bias" in config.wefe.experiments
+
+
+def test_project_config_requires_corpus_language(tmp_path: Path) -> None:
+    config_path = tmp_path / "project.yaml"
+    config_path.write_text(valid_config_yaml().replace('  language: "german"\n', ""), encoding="utf-8")
+
+    with pytest.raises(ValidationError, match="language"):
+        ProjectConfig.from_yaml(config_path)
+
+
+def test_project_config_requires_embedding_path(tmp_path: Path) -> None:
+    config_path = tmp_path / "project.yaml"
+    config_path.write_text(valid_config_yaml().replace('  path: "models/embeddings.kv"\n', ""), encoding="utf-8")
+
+    with pytest.raises(ValidationError, match="path"):
+        ProjectConfig.from_yaml(config_path)
+
+
+def test_project_config_rejects_undefined_word_set_reference(tmp_path: Path) -> None:
+    config_path = tmp_path / "project.yaml"
+    config_path.write_text(
+        valid_config_yaml().replace('["career_words", "family_words"]', '["career_words", "unknown_words"]'),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValidationError, match="undefined word sets"):
+        ProjectConfig.from_yaml(config_path)
+
+
+def test_project_config_rejects_blank_metadata_id_column(tmp_path: Path) -> None:
+    config_path = tmp_path / "project.yaml"
+    config_path.write_text(valid_config_yaml().replace('  id_column: "article_id"', '  id_column: ""'), encoding="utf-8")
+
+    with pytest.raises(ValidationError, match="metadata.id_column"):
+        ProjectConfig.from_yaml(config_path)
+
+
+def test_project_config_requires_analysis_target_groups(tmp_path: Path) -> None:
+    config_path = tmp_path / "project.yaml"
+    config_path.write_text(
+        valid_config_yaml().replace(
+            '    migration_groups: ["migrant", "migranten", "flüchtlinge"]\n', ""
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValidationError, match="target_groups"):
+        ProjectConfig.from_yaml(config_path)
