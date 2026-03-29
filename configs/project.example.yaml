@@ -35,10 +35,17 @@ output:
 analysis:
   target_groups:
     migration_groups: ["migrant", "migranten", "migrantin", "migrantinnen", "flüchtling", "flüchtlinge", "geflüchtete"]
+    palestinian_journalists: ["palästinensische journalisten", "journalisten aus gaza", "medienarbeiter aus gaza"]
     roma_people: ["roma", "romnja", "sinti", "sintize", "romani"]
   framing_lexicons:
     dehumanizing: ["flut", "welle", "plage", "parasiten", "ungeziefer", "invasion"]
     criminalizing: ["illegal", "kriminalität", "kriminell", "bande", "bedrohung", "verdächtig"]
+    collectivizing: ["der feind", "die palästinenser", "die migranten", "feindvolk"]
+    erasure_of_civilian_status: ["hamas-nah", "nicht-zivilisten", "schutzschild"]
+    incitement_displacement: ["vertreiben", "umsiedeln", "zwangsumsiedlung"]
+    incitement_destruction: ["dem erdboden gleichmachen", "auslöschen", "vernichten"]
+    discrediting_journalists: ["terrorpropaganda", "hamas-sprachrohr", "falschmeldung"]
+    censorship_repression: ["einschüchterung", "zensur", "informationssperre", "zugangsverbot"]
     victimizing: ["opfer", "schutzlos", "vertrieben", "leidend", "hilflos"]
     humanizing: ["familie", "arbeiter", "gemeinschaft", "nachbar", "mensch", "menschen"]
   context_window_tokens: 8

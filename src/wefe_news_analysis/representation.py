@@ -81,6 +81,7 @@ class SentenceFeature:
     token_count: int
     mention_count: int
     quote_count: int
+    quoted_context: int
     active_voice: int
     passive_voice: int
     lexicon_counts: dict[str, int]
@@ -112,6 +113,10 @@ def split_sentences(text: str) -> list[str]:
 
 def tokenize(text: str) -> list[str]:
     return [token.lower() for token in TOKEN_PATTERN.findall(text)]
+
+
+def normalize_match_text(text: str) -> str:
+    return " ".join(tokenize(text))
 
 
 def parse_sentences_with_fallback(text: str, config: ProjectConfig, parser=None) -> list[ParsedSentence]:
@@ -161,8 +166,26 @@ def parse_sentences_with_fallback(text: str, config: ProjectConfig, parser=None)
 
 
 def find_group_mentions(tokens: list[str], terms: list[str]) -> list[tuple[int, str]]:
-    lookup = set(terms)
-    return [(index, token) for index, token in enumerate(tokens) if token in lookup]
+    mentions: list[tuple[int, str]] = []
+    normalized_tokens = [token.lower() for token in tokens]
+
+    for term in terms:
+        term_tokens = tokenize(term)
+        if not term_tokens:
+            continue
+        if len(term_tokens) == 1:
+            mentions.extend(
+                (index, term) for index, token in enumerate(normalized_tokens) if token == term_tokens[0]
+            )
+            continue
+
+        span = len(term_tokens)
+        for index in range(len(normalized_tokens) - span + 1):
+            if normalized_tokens[index : index + span] == term_tokens:
+                mentions.append((index, term))
+
+    mentions.sort(key=lambda item: item[0])
+    return mentions
 
 
 def detect_passive_voice(tokens: list[str], mention_index: int, parsed_tokens: list[ParsedToken] | None = None) -> int:
@@ -200,19 +223,70 @@ def detect_active_voice(tokens: list[str], mention_index: int, parsed_tokens: li
     return 0
 
 
-def count_lexicon_hits(tokens: list[str], lexicons: dict[str, list[str]], mention_index: int, window_size: int) -> dict[str, int]:
+def count_phrase_hits(window_text: str, phrase: str) -> int:
+    normalized_phrase = normalize_match_text(phrase)
+    if not normalized_phrase:
+        return 0
+    pattern = re.compile(rf"(?<!\w){re.escape(normalized_phrase)}(?!\w)")
+    return len(pattern.findall(window_text))
+
+
+def count_lexicon_hits(
+    tokens: list[str],
+    lexicons: dict[str, list[str]],
+    mention_index: int,
+    window_size: int,
+    sentence_text: str,
+) -> dict[str, int]:
     lower_bound = max(0, mention_index - window_size)
     upper_bound = min(len(tokens), mention_index + window_size + 1)
     window_tokens = tokens[lower_bound:upper_bound]
+    window_text = " ".join(window_tokens)
+    sentence_match_text = normalize_match_text(sentence_text)
     counts: dict[str, int] = {}
     for name, words in lexicons.items():
-        counts[name] = sum(
-            1
-            for token in window_tokens
-            for word in words
-            if token == word or (len(word) >= 5 and (token.startswith(word) or token.endswith(word)))
-        )
+        count = 0
+        for word in words:
+            normalized_word = normalize_match_text(word)
+            if not normalized_word:
+                continue
+            if " " in normalized_word:
+                count += count_phrase_hits(sentence_match_text, normalized_word)
+                continue
+
+            for token in window_tokens:
+                if token == normalized_word or (
+                    len(normalized_word) >= 5 and (token.startswith(normalized_word) or token.endswith(normalized_word))
+                ):
+                    count += 1
+        counts[name] = count
     return counts
+
+
+def is_quoted_context(sentence_text: str) -> int:
+    quote_marks = ['"', "“", "”", "„", "«", "»", "'"]
+    return int(sum(sentence_text.count(mark) for mark in quote_marks) >= 2)
+
+
+def compute_dehumanization_score(lexicon_counts: dict[str, int], passive_voice: int, humanizing_hits: int) -> float:
+    severe_categories = {"dehumanizing", "collectivizing", "erasure_of_civilian_status"}
+    incitement_categories = {"incitement_displacement", "incitement_destruction"}
+    repression_categories = {"criminalizing", "discrediting_journalists", "censorship_repression"}
+
+    score = 0.0
+    for name, count in lexicon_counts.items():
+        if name in severe_categories:
+            score += 2.0 * count
+        elif name in incitement_categories:
+            score += 2.5 * count
+        elif name in repression_categories:
+            score += 1.5 * count
+        elif name == "victimizing":
+            score += 0.5 * count
+
+    score += 0.5 * passive_voice
+    score -= 1.0 * humanizing_hits
+    return round(score, 4)
 
 
 def analyze_article_text(article_id: str, text: str, config: ProjectConfig, parser=None) -> list[SentenceFeature]:
@@ -235,6 +309,7 @@ def analyze_article_text(article_id: str, text: str, config: ProjectConfig, pars
                         token_count=len(tokens),
                         mention_count=len(mentions),
                         quote_count=sentence.text.count('"') + sentence.text.count("'"),
+                        quoted_context=is_quoted_context(sentence.text),
                         active_voice=detect_active_voice(tokens, mention_index, sentence.tokens),
                         passive_voice=detect_passive_voice(tokens, mention_index, sentence.tokens),
                         lexicon_counts=count_lexicon_hits(
@@ -242,6 +317,7 @@ def analyze_article_text(article_id: str, text: str, config: ProjectConfig, pars
                             config.analysis.framing_lexicons,
                             mention_index,
                             config.analysis.context_window_tokens,
+                            sentence.text,
                         ),
                     )
                 )
@@ -260,6 +336,7 @@ def sentence_feature_rows(features: list[SentenceFeature], metadata_rows: dict[s
             "token_count": feature.token_count,
             "mention_count": feature.mention_count,
             "quote_count": feature.quote_count,
+            "quoted_context": feature.quoted_context,
             "active_voice": feature.active_voice,
             "passive_voice": feature.passive_voice,
         }
@@ -284,6 +361,7 @@ def aggregate_article_group_rows(features: list[SentenceFeature], metadata_rows:
                 "active_voice_mentions": 0,
                 "passive_voice_mentions": 0,
                 "quote_count": 0,
+                "quoted_mentions": 0,
             }
             for lexicon_name in feature.lexicon_counts:
                 grouped[key][f"{lexicon_name}_count"] = 0
@@ -292,6 +370,7 @@ def aggregate_article_group_rows(features: list[SentenceFeature], metadata_rows:
         grouped[key]["active_voice_mentions"] += feature.active_voice
         grouped[key]["passive_voice_mentions"] += feature.passive_voice
         grouped[key]["quote_count"] += feature.quote_count
+        grouped[key]["quoted_mentions"] += feature.quoted_context
         sentence_tracker[key].add(feature.sentence_index)
 
         for lexicon_name, count in feature.lexicon_counts.items():
@@ -303,6 +382,17 @@ def aggregate_article_group_rows(features: list[SentenceFeature], metadata_rows:
         mention_instances = int(row["mention_instances"])
         row["active_voice_rate"] = round(int(row["active_voice_mentions"]) / mention_instances, 4)
         row["passive_voice_rate"] = round(int(row["passive_voice_mentions"]) / mention_instances, 4)
+        row["quoted_context_rate"] = round(int(row["quoted_mentions"]) / mention_instances, 4)
+        lexicon_counts = {
+            key.removesuffix("_count"): int(value)
+            for key, value in row.items()
+            if key.endswith("_count")
+        }
+        row["dehumanization_score"] = compute_dehumanization_score(
+            lexicon_counts,
+            int(row["passive_voice_mentions"]),
+            lexicon_counts.get("humanizing", 0),
+        )
         row.update(metadata_rows.get(row["article_id"], {}))
         rows.append(row)
 
@@ -358,6 +448,7 @@ def analyze_representation(config: ProjectConfig) -> tuple[Path, Path]:
         "token_count",
         "mention_count",
         "quote_count",
+        "quoted_context",
         "active_voice",
         "passive_voice",
         *config.analysis.framing_lexicons.keys(),
@@ -371,9 +462,12 @@ def analyze_representation(config: ProjectConfig) -> tuple[Path, Path]:
         "active_voice_mentions",
         "passive_voice_mentions",
         "quote_count",
+        "quoted_mentions",
         *[f"{name}_count" for name in config.analysis.framing_lexicons],
         "active_voice_rate",
         "passive_voice_rate",
+        "quoted_context_rate",
+        "dehumanization_score",
         *metadata_fieldnames,
     ]
 

@@ -88,9 +88,16 @@ def valid_config_yaml(base_dir: Path) -> str:
             "analysis:",
             "  target_groups:",
             '    migration_groups: ["migrant", "migranten", "flüchtling", "flüchtlinge", "geflüchtete"]',
+            '    palestinian_journalists: ["palästinensische journalisten"]',
             "  framing_lexicons:",
             '    dehumanizing: ["flut", "parasiten", "plage"]',
             '    criminalizing: ["kriminell", "illegal", "bedrohung"]',
+            '    collectivizing: ["der feind", "die migranten"]',
+            '    erasure_of_civilian_status: ["hamas-nah", "nicht-zivilisten"]',
+            '    incitement_displacement: ["zwangsumsiedlung", "vertreiben"]',
+            '    incitement_destruction: ["dem erdboden gleichmachen", "vernichten"]',
+            '    discrediting_journalists: ["terrorpropaganda", "hamas-sprachrohr"]',
+            '    censorship_repression: ["zensur", "informationssperre"]',
             '    humanizing: ["familie", "gemeinschaft", "mensch"]',
             "  context_window_tokens: 5",
             '  parser_model: "de_core_news_sm"',
@@ -151,6 +158,24 @@ def test_analyze_article_text_uses_german_parser_dependencies(tmp_path: Path) ->
     assert features[1].lexicon_counts["humanizing"] >= 1
 
 
+def test_analyze_article_text_matches_multiword_lexicons_and_quotes(tmp_path: Path) -> None:
+    config_path = tmp_path / "project.yaml"
+    config_path.write_text(valid_config_yaml(tmp_path), encoding="utf-8")
+    config = ProjectConfig.from_yaml(config_path)
+
+    features = analyze_article_text(
+        "article_3",
+        'Ein Kommentar nannte "die Migranten" den Feind und wollte Gaza dem Erdboden gleichmachen.',
+        config,
+        parser=None,
+    )
+
+    assert len(features) == 1
+    assert features[0].quoted_context == 1
+    assert features[0].lexicon_counts["collectivizing"] >= 1
+    assert features[0].lexicon_counts["incitement_destruction"] >= 1
+
+
 def test_analyze_representation_exports_csvs(tmp_path: Path) -> None:
     config_path = tmp_path / "project.yaml"
     config_path.write_text(valid_config_yaml(tmp_path), encoding="utf-8")
@@ -173,6 +198,8 @@ def test_analyze_representation_exports_csvs(tmp_path: Path) -> None:
     assert article_group_path.exists()
     assert "Daily News" in article_group_path.read_text(encoding="utf-8")
     assert "dehumanizing_count" in article_group_path.read_text(encoding="utf-8")
+    assert "dehumanization_score" in article_group_path.read_text(encoding="utf-8")
+    assert "quoted_context" in sentence_path.read_text(encoding="utf-8")
 
 
 def test_analyze_representation_cli_exports_reports(tmp_path: Path) -> None:
