@@ -29,7 +29,7 @@ python -m spacy download de_core_news_sm
 cp configs/project.example.yaml configs/project.yaml
 ```
 
-3. Put input PDFs under `data/raw/pdfs/`.
+3. Put input PDFs under `data/raw/pdfs/` and optional raw text articles under `data/raw/text/`.
 
 4. Extract text:
 
@@ -61,6 +61,7 @@ The config is organized by subsystem:
 
 - `project`: project-level identity
 - `corpus`: PDF input, processed text output, language, and encoding
+  The corpus can include both PDF and raw `.txt` inputs.
 - `metadata`: optional sidecar CSV settings keyed by article id
 - `preprocessing`: deterministic text cleanup rules applied during PDF extraction
 - `embeddings`: local pretrained embedding artifact settings

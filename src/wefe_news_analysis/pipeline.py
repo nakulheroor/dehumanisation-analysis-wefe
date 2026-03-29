@@ -69,6 +69,8 @@ GERMAN_STOPWORDS = {
 
 def ensure_directories(config: ProjectConfig) -> None:
     config.corpus.raw_pdf_dir.mkdir(parents=True, exist_ok=True)
+    if config.corpus.raw_text_dir is not None:
+        config.corpus.raw_text_dir.mkdir(parents=True, exist_ok=True)
     config.corpus.processed_text_dir.mkdir(parents=True, exist_ok=True)
     config.output.reports_dir.mkdir(parents=True, exist_ok=True)
     config.output.manifest_path.parent.mkdir(parents=True, exist_ok=True)
@@ -78,8 +80,18 @@ def ensure_directories(config: ProjectConfig) -> None:
         config.metadata.sidecar_csv_path.parent.mkdir(parents=True, exist_ok=True)
 
 
-def discover_pdfs(config: ProjectConfig) -> list[Path]:
+def discover_pdf_inputs(config: ProjectConfig) -> list[Path]:
     return sorted(config.corpus.raw_pdf_dir.rglob(config.corpus.article_glob))
+
+
+def discover_text_inputs(config: ProjectConfig) -> list[Path]:
+    if config.corpus.raw_text_dir is None:
+        return []
+    return sorted(config.corpus.raw_text_dir.rglob(config.corpus.text_glob))
+
+
+def read_text_input(text_path: Path, config: ProjectConfig) -> str:
+    return text_path.read_text(encoding=config.corpus.default_encoding)
 
 
 def preprocess_text(text: str, config: ProjectConfig) -> str:
@@ -152,14 +164,20 @@ def extract_pdfs(config: ProjectConfig) -> list[Path]:
     ensure_directories(config)
     written_files: list[Path] = []
 
-    for pdf_path in discover_pdfs(config):
+    for pdf_path in discover_pdf_inputs(config):
         article = extract_text_from_pdf(pdf_path)
         article_text = preprocess_text(article.text, config)
         output_path = config.corpus.processed_text_dir / f"{pdf_path.stem}.txt"
         output_path.write_text(article_text, encoding=config.corpus.default_encoding)
         written_files.append(output_path)
 
-    return written_files
+    for text_path in discover_text_inputs(config):
+        article_text = preprocess_text(read_text_input(text_path, config), config)
+        output_path = config.corpus.processed_text_dir / f"{text_path.stem}.txt"
+        output_path.write_text(article_text, encoding=config.corpus.default_encoding)
+        written_files.append(output_path)
+
+    return sorted(written_files)
 
 
 def build_manifest(config: ProjectConfig) -> Path:
