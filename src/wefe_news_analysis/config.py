@@ -27,6 +27,7 @@ class CorpusConfig(BaseModel):
         return cleaned
 
 
+
 class MetadataConfig(BaseModel):
     sidecar_csv_path: Path | None = None
     id_column: str = "article_id"
