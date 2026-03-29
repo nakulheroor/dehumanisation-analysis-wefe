@@ -20,6 +20,7 @@ Scaffold for a Python project that extracts text from newspaper PDFs and runs wo
 python -m venv .venv
 source .venv/bin/activate
 pip install -e .[dev]
+python -m spacy download de_core_news_sm
 ```
 
 2. Copy the example config and adapt it:
@@ -65,6 +66,7 @@ The config is organized by subsystem:
 - `embeddings`: local pretrained embedding artifact settings
 - `output`: manifest and report destinations
 - `analysis`: target groups, framing lexicons, context window, and representation export paths
+  Parser-backed German analysis uses `analysis.parser_model`, defaulting to `de_core_news_sm`.
 - `wefe`: reusable named word sets and named experiments
 
 ## Suggested next steps

@@ -13,6 +13,7 @@ dependencies = [
   "pydantic-settings>=2.2,<3",
   "pypdf>=4.2,<6",
   "PyYAML>=6.0,<7",
+  "spacy>=3.8,<4",
   "typer>=0.12,<1",
   "rich>=13.7,<14",
   "wefe>=0.4.1,<0.5",
@@ -39,4 +40,3 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-

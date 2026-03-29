@@ -46,6 +46,7 @@ def valid_config_yaml() -> str:
             '    dehumanizing: ["flut", "parasiten"]',
             '    humanizing: ["mensch", "gemeinschaft"]',
             "  context_window_tokens: 8",
+            '  parser_model: "de_core_news_sm"',
             "  outputs:",
             '    sentence_features_path: "reports/sentence_representation_features.csv"',
             '    article_group_features_path: "reports/article_group_representation_features.csv"',

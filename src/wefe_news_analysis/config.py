@@ -87,6 +87,7 @@ class RepresentationAnalysisConfig(BaseModel):
     target_groups: dict[str, list[str]] = Field(default_factory=dict)
     framing_lexicons: dict[str, list[str]] = Field(default_factory=dict)
     context_window_tokens: int = 8
+    parser_model: str = "de_core_news_sm"
     outputs: AnalysisOutputConfig
 
     @field_validator("target_groups", "framing_lexicons")
@@ -111,6 +112,14 @@ class RepresentationAnalysisConfig(BaseModel):
         if value < 1:
             raise ValueError("analysis.context_window_tokens must be at least 1.")
         return value
+
+    @field_validator("parser_model")
+    @classmethod
+    def validate_parser_model(cls, value: str) -> str:
+        cleaned = value.strip()
+        if not cleaned:
+            raise ValueError("analysis.parser_model must not be empty.")
+        return cleaned
 
 
 class WefeExperimentConfig(BaseModel):

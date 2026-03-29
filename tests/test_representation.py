@@ -7,6 +7,53 @@ from wefe_news_analysis.config import ProjectConfig
 from wefe_news_analysis.representation import analyze_article_text, analyze_representation
 
 
+class FakeToken:
+    def __init__(self, text: str, index: int, lemma: str, dep: str, pos: str) -> None:
+        self.text = text
+        self.i = index
+        self.lemma_ = lemma
+        self.dep_ = dep
+        self.pos_ = pos
+        self.is_space = False
+
+
+class FakeSentence:
+    def __init__(self, tokens: list[FakeToken]) -> None:
+        self._tokens = tokens
+        self.start = tokens[0].i if tokens else 0
+        self.text = " ".join(token.text for token in tokens)
+
+    def __iter__(self):
+        return iter(self._tokens)
+
+
+class FakeDoc:
+    def __init__(self, sentences: list[FakeSentence]) -> None:
+        self.sents = sentences
+
+
+class FakeGermanParser:
+    def __call__(self, text: str) -> FakeDoc:
+        return FakeDoc(
+            [
+                FakeSentence(
+                    [
+                        FakeToken("Migranten", 0, "Migrant", "sb", "NOUN"),
+                        FakeToken("wurden", 1, "werden", "ROOT", "AUX"),
+                        FakeToken("verhaftet", 2, "verhaften", "oc", "VERB"),
+                    ]
+                ),
+                FakeSentence(
+                    [
+                        FakeToken("Migranten", 3, "Migrant", "sb", "NOUN"),
+                        FakeToken("organisierten", 4, "organisieren", "ROOT", "VERB"),
+                        FakeToken("Gemeinschaftsküchen", 5, "Gemeinschaftsküche", "oa", "NOUN"),
+                    ]
+                ),
+            ]
+        )
+
+
 def valid_config_yaml(base_dir: Path) -> str:
     return "\n".join(
         [
@@ -46,6 +93,7 @@ def valid_config_yaml(base_dir: Path) -> str:
             '    criminalizing: ["kriminell", "illegal", "bedrohung"]',
             '    humanizing: ["familie", "gemeinschaft", "mensch"]',
             "  context_window_tokens: 5",
+            '  parser_model: "de_core_news_sm"',
             "  outputs:",
             f'    sentence_features_path: "{base_dir / "reports" / "sentence_features.csv"}"',
             f'    article_group_features_path: "{base_dir / "reports" / "article_group_features.csv"}"',
@@ -82,6 +130,25 @@ def test_analyze_article_text_detects_group_framing() -> None:
     assert any(feature.active_voice == 1 for feature in features)
     assert any(feature.lexicon_counts["dehumanizing"] >= 1 for feature in features)
     assert any(feature.lexicon_counts["humanizing"] >= 1 for feature in features)
+
+
+def test_analyze_article_text_uses_german_parser_dependencies(tmp_path: Path) -> None:
+    config_path = tmp_path / "project.yaml"
+    config_path.write_text(valid_config_yaml(tmp_path), encoding="utf-8")
+    config = ProjectConfig.from_yaml(config_path)
+
+    features = analyze_article_text(
+        "article_2",
+        "Migranten wurden verhaftet. Migranten organisierten Gemeinschaftsküchen.",
+        config,
+        parser=FakeGermanParser(),
+    )
+
+    assert len(features) == 2
+    assert features[0].passive_voice == 1
+    assert features[0].active_voice == 0
+    assert features[1].active_voice == 1
+    assert features[1].lexicon_counts["humanizing"] >= 1
 
 
 def test_analyze_representation_exports_csvs(tmp_path: Path) -> None:

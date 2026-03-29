@@ -54,6 +54,7 @@ def make_config(tmp_path: Path, sidecar_csv_path: Path | None = None) -> Project
                 "humanizing": ["mensch", "gemeinschaft"],
             },
             context_window_tokens=5,
+            parser_model="de_core_news_sm",
             outputs=AnalysisOutputConfig(
                 sentence_features_path=tmp_path / "reports" / "sentence_features.csv",
                 article_group_features_path=tmp_path / "reports" / "article_group_features.csv",

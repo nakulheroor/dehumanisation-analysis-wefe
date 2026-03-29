@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .config import ProjectConfig
+from .nlp import load_german_parser
 from .pipeline import ensure_directories, load_metadata_rows
 
 TOKEN_PATTERN = re.compile(r"\b[\w'-]+\b")
@@ -85,6 +86,22 @@ class SentenceFeature:
     lexicon_counts: dict[str, int]
 
 
+@dataclass(slots=True)
+class ParsedToken:
+    text: str
+    lower: str
+    lemma: str
+    dep: str
+    pos: str
+    index: int
+
+
+@dataclass(slots=True)
+class ParsedSentence:
+    text: str
+    tokens: list[ParsedToken]
+
+
 def split_sentences(text: str) -> list[str]:
     if not text.strip():
         return []
@@ -97,12 +114,64 @@ def tokenize(text: str) -> list[str]:
     return [token.lower() for token in TOKEN_PATTERN.findall(text)]
 
 
+def parse_sentences_with_fallback(text: str, config: ProjectConfig, parser=None) -> list[ParsedSentence]:
+    if parser is None and config.corpus.language.lower() == "german":
+        try:
+            parser = load_german_parser(config.analysis.parser_model)
+        except RuntimeError:
+            parser = None
+
+    if parser is not None:
+        doc = parser(text)
+        parsed_sentences: list[ParsedSentence] = []
+        for sentence in doc.sents:
+            tokens = [
+                ParsedToken(
+                    text=token.text,
+                    lower=token.text.lower(),
+                    lemma=getattr(token, "lemma_", token.text.lower()).lower(),
+                    dep=getattr(token, "dep_", ""),
+                    pos=getattr(token, "pos_", ""),
+                    index=token.i - sentence.start,
+                )
+                for token in sentence
+                if not getattr(token, "is_space", False)
+            ]
+            parsed_sentences.append(ParsedSentence(text=sentence.text.strip(), tokens=tokens))
+        return parsed_sentences
+
+    return [
+        ParsedSentence(
+            text=sentence,
+            tokens=[
+                ParsedToken(
+                    text=token,
+                    lower=token,
+                    lemma=token,
+                    dep="",
+                    pos="",
+                    index=index,
+                )
+                for index, token in enumerate(tokenize(sentence))
+            ],
+        )
+        for sentence in split_sentences(text)
+        if sentence.strip()
+    ]
+
+
 def find_group_mentions(tokens: list[str], terms: list[str]) -> list[tuple[int, str]]:
     lookup = set(terms)
     return [(index, token) for index, token in enumerate(tokens) if token in lookup]
 
 
-def detect_passive_voice(tokens: list[str], mention_index: int) -> int:
+def detect_passive_voice(tokens: list[str], mention_index: int, parsed_tokens: list[ParsedToken] | None = None) -> int:
+    if parsed_tokens:
+        has_passive_aux = any(token.lemma == "werden" and token.pos in {"AUX", "VERB"} for token in parsed_tokens)
+        mention_token = parsed_tokens[mention_index]
+        if has_passive_aux and mention_token.dep in {"sb", "nsubj", "sbp"}:
+            return 1
+
     window = tokens[max(0, mention_index - 4) : min(len(tokens), mention_index + 9)]
     for index, token in enumerate(window):
         if token in PASSIVE_AUXILIARIES:
@@ -115,7 +184,13 @@ def detect_passive_voice(tokens: list[str], mention_index: int) -> int:
     return 0
 
 
-def detect_active_voice(tokens: list[str], mention_index: int) -> int:
+def detect_active_voice(tokens: list[str], mention_index: int, parsed_tokens: list[ParsedToken] | None = None) -> int:
+    if parsed_tokens:
+        mention_token = parsed_tokens[mention_index]
+        has_passive_aux = any(token.lemma == "werden" and token.pos in {"AUX", "VERB"} for token in parsed_tokens)
+        if mention_token.dep in {"sb", "nsubj"} and not has_passive_aux:
+            return 1
+
     trailing = tokens[mention_index + 1 : mention_index + 5]
     if trailing and trailing[0] in PASSIVE_AUXILIARIES:
         return 0
@@ -140,10 +215,10 @@ def count_lexicon_hits(tokens: list[str], lexicons: dict[str, list[str]], mentio
     return counts
 
 
-def analyze_article_text(article_id: str, text: str, config: ProjectConfig) -> list[SentenceFeature]:
+def analyze_article_text(article_id: str, text: str, config: ProjectConfig, parser=None) -> list[SentenceFeature]:
     features: list[SentenceFeature] = []
-    for sentence_index, sentence in enumerate(split_sentences(text), start=1):
-        tokens = tokenize(sentence)
+    for sentence_index, sentence in enumerate(parse_sentences_with_fallback(text, config, parser), start=1):
+        tokens = [token.lower for token in sentence.tokens]
         if not tokens:
             continue
 
@@ -156,12 +231,12 @@ def analyze_article_text(article_id: str, text: str, config: ProjectConfig) -> l
                         group_name=group_name,
                         matched_term=matched_term,
                         sentence_index=sentence_index,
-                        sentence_text=sentence,
+                        sentence_text=sentence.text,
                         token_count=len(tokens),
                         mention_count=len(mentions),
-                        quote_count=sentence.count('"') + sentence.count("'"),
-                        active_voice=detect_active_voice(tokens, mention_index),
-                        passive_voice=detect_passive_voice(tokens, mention_index),
+                        quote_count=sentence.text.count('"') + sentence.text.count("'"),
+                        active_voice=detect_active_voice(tokens, mention_index, sentence.tokens),
+                        passive_voice=detect_passive_voice(tokens, mention_index, sentence.tokens),
                         lexicon_counts=count_lexicon_hits(
                             tokens,
                             config.analysis.framing_lexicons,
@@ -258,12 +333,18 @@ def analyze_representation(config: ProjectConfig) -> tuple[Path, Path]:
     ensure_directories(config)
     metadata_rows = load_metadata_rows(config)
     text_files = sorted(config.corpus.processed_text_dir.glob("*.txt"))
+    parser = None
+    if config.corpus.language.lower() == "german":
+        try:
+            parser = load_german_parser(config.analysis.parser_model)
+        except RuntimeError:
+            parser = None
 
     features: list[SentenceFeature] = []
     for text_path in text_files:
         article_id = text_path.stem
         text = text_path.read_text(encoding=config.corpus.default_encoding)
-        features.extend(analyze_article_text(article_id, text, config))
+        features.extend(analyze_article_text(article_id, text, config, parser))
 
     sentence_rows = sentence_feature_rows(features, metadata_rows)
     article_group_rows = aggregate_article_group_rows(features, metadata_rows)
