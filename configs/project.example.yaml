@@ -3,8 +3,10 @@ project:
 
 corpus:
   raw_pdf_dir: "data/raw/pdfs"
+  raw_text_dir: "data/raw/text"
   processed_text_dir: "data/processed/text"
   article_glob: "*.pdf"
+  text_glob: "*.txt"
   language: "german"
   default_encoding: "utf-8"
 

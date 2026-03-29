@@ -13,8 +13,10 @@ class ProjectSection(BaseModel):
 
 class CorpusConfig(BaseModel):
     raw_pdf_dir: Path
+    raw_text_dir: Path | None = None
     processed_text_dir: Path
     article_glob: str = "*.pdf"
+    text_glob: str = "*.txt"
     language: str
     default_encoding: str = "utf-8"
 

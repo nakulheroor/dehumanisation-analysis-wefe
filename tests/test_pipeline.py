@@ -13,7 +13,7 @@ from wefe_news_analysis.config import (
     WefeConfig,
     WefeExperimentConfig,
 )
-from wefe_news_analysis.pipeline import build_manifest, ensure_directories, preprocess_text
+from wefe_news_analysis.pipeline import build_manifest, ensure_directories, extract_pdfs, preprocess_text
 
 
 def make_config(tmp_path: Path, sidecar_csv_path: Path | None = None) -> ProjectConfig:
@@ -21,8 +21,10 @@ def make_config(tmp_path: Path, sidecar_csv_path: Path | None = None) -> Project
         project=ProjectSection(name="demo"),
         corpus=CorpusConfig(
             raw_pdf_dir=tmp_path / "raw" / "pdfs",
+            raw_text_dir=tmp_path / "raw" / "text",
             processed_text_dir=tmp_path / "processed" / "text",
             article_glob="*.pdf",
+            text_glob="*.txt",
             language="german",
             default_encoding="utf-8",
         ),
@@ -104,3 +106,19 @@ def test_preprocess_text_applies_configured_cleanup(tmp_path: Path) -> None:
     processed = preprocess_text("Die 2026 ﬁnan-\nzen und das haus!", config)
 
     assert processed == "finanzen haus"
+
+
+def test_extract_pdfs_also_ingests_raw_text_files(tmp_path: Path) -> None:
+    config = make_config(tmp_path)
+    ensure_directories(config)
+    config.corpus.raw_text_dir.mkdir(parents=True, exist_ok=True)
+    (config.corpus.raw_text_dir / "artikel_1.txt").write_text(
+        "Die 2026 Migranten und das haus!",
+        encoding="utf-8",
+    )
+
+    written_files = extract_pdfs(config)
+
+    output_path = config.corpus.processed_text_dir / "artikel_1.txt"
+    assert output_path in written_files
+    assert output_path.read_text(encoding="utf-8") == "migranten haus"
