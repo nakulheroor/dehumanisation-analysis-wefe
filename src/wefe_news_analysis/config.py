@@ -66,6 +66,11 @@ class EmbeddingsConfig(BaseModel):
     format: Literal["word2vec", "keyedvectors", "gensim"]
     binary: bool
     model_name: str
+    vector_size: int = 100
+    window: int = 5
+    min_count: int = 1
+    epochs: int = 10
+    sg: int = 1
 
     @field_validator("model_name")
     @classmethod
@@ -74,6 +79,20 @@ class EmbeddingsConfig(BaseModel):
         if not cleaned:
             raise ValueError("embeddings.model_name must not be empty.")
         return cleaned
+
+    @field_validator("vector_size", "window", "min_count", "epochs")
+    @classmethod
+    def validate_positive_ints(cls, value: int, info: ValidationInfo) -> int:
+        if value < 1:
+            raise ValueError(f"embeddings.{info.field_name} must be at least 1.")
+        return value
+
+    @field_validator("sg")
+    @classmethod
+    def validate_sg(cls, value: int) -> int:
+        if value not in {0, 1}:
+            raise ValueError("embeddings.sg must be 0 (CBOW) or 1 (skip-gram).")
+        return value
 
 
 class OutputConfig(BaseModel):

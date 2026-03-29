@@ -1,20 +1,30 @@
 # WEFE Newspaper Analysis
 
-Scaffold for a Python project that extracts text from newspaper PDFs and runs word embedding fairness evaluation workflows with WEFE.
+Python project for German newspaper corpora that:
 
-## What is included
+- ingests PDFs and raw `.txt` articles
+- preprocesses and normalizes corpus text
+- builds article manifests with optional sidecar metadata
+- runs parser-backed representation/framing analysis
+- trains static Word2Vec embeddings from the corpus
+- runs configured WEFE experiments and exports results
 
-- A `src/`-layout Python package
-- A Typer-based CLI
+## Current capabilities
+
+- `src/`-layout Python package with Typer CLI
 - YAML-based project configuration
-- PDF text extraction utilities
-- Corpus manifest generation
-- A placeholder WEFE execution layer
-- Basic tests for the initial structure
+- PDF extraction with `pypdf`
+- Raw text ingestion alongside PDFs
+- German preprocessing and stopword handling
+- German parser-backed analysis with spaCy
+- Sentence-level and article/group-level representation features
+- Word2Vec embedding training with `gensim`
+- WEFE query construction and batch execution
+- Test coverage for ingestion, analysis, embedding training, and WEFE export
 
-## Quick start
+## Setup
 
-1. Create a virtual environment and install the project:
+Create and activate a virtual environment, install the project, then install the German spaCy model:
 
 ```bash
 python -m venv .venv
@@ -23,67 +33,139 @@ pip install -e .[dev]
 python -m spacy download de_core_news_sm
 ```
 
-2. Copy the example config and adapt it:
+Create your working config:
 
 ```bash
 cp configs/project.example.yaml configs/project.yaml
 ```
 
-3. Put input PDFs under `data/raw/pdfs/` and optional raw text articles under `data/raw/text/`.
+## Data layout
 
-4. Extract text:
+Input corpus files can be mixed:
+
+- PDFs under `data/raw/pdfs/`
+- Raw text files under `data/raw/text/`
+
+Optional metadata can be supplied as a CSV sidecar, by default:
+
+- `data/raw/article_metadata.csv`
+
+Processed outputs are written under:
+
+- `data/processed/text/`
+- `data/processed/articles_manifest.csv`
+- `reports/`
+- `models/`
+
+## CLI workflow
+
+1. Extract and preprocess the corpus:
 
 ```bash
 wefe-news extract-pdfs --config configs/project.yaml
 ```
 
-5. Build a manifest of extracted articles:
+Despite the command name, this ingests both PDFs and raw `.txt` inputs.
+
+2. Build a manifest:
 
 ```bash
 wefe-news build-manifest --config configs/project.yaml
 ```
 
-6. Export sentence-level and article-level representation features:
+3. Run representation/framing analysis:
 
 ```bash
 wefe-news analyze-representation --config configs/project.yaml
 ```
 
-7. Inspect a configured WEFE experiment:
+4. Train embeddings from the processed corpus:
 
 ```bash
-wefe-news show-query --config configs/project.yaml --experiment gender_career_bias
+wefe-news train-embeddings --config configs/project.yaml
 ```
 
-## Config structure
+5. Run all configured WEFE experiments:
 
-The config is organized by subsystem:
+```bash
+wefe-news run-wefe --config configs/project.yaml
+```
 
-- `project`: project-level identity
-- `corpus`: PDF input, processed text output, language, and encoding
-  The corpus can include both PDF and raw `.txt` inputs.
-- `metadata`: optional sidecar CSV settings keyed by article id
-- `preprocessing`: deterministic text cleanup rules applied during PDF extraction
-- `embeddings`: local pretrained embedding artifact settings
-- `output`: manifest and report destinations
-- `analysis`: target groups, framing lexicons, context window, and representation export paths
-  Parser-backed German analysis uses `analysis.parser_model`, defaulting to `de_core_news_sm`.
-- `wefe`: reusable named word sets and named experiments
+6. Inspect a configured WEFE query:
 
-## Suggested next steps
+```bash
+wefe-news show-query --config configs/project.yaml --experiment migration_dehumanization
+```
 
-- Fill `data/raw/article_metadata.csv` if you want article metadata merged into the manifest
-- Replace the example target groups and framing lexicons with the terms specific to your newsroom study
-- Choose or train the embedding model you want to audit
-- Implement the WEFE execution path in `wefe_runner.py` for your embedding format
-- Add preprocessing rules for multilingual or OCR-heavy PDFs
+## Config overview
 
-## Layout
+The main config sections are:
+
+- `project`: project identity
+- `corpus`: raw input directories, globs, language, processed text directory, encoding
+- `metadata`: sidecar CSV path and article id column
+- `preprocessing`: normalization and cleanup rules
+- `embeddings`: output path, format, model name, and Word2Vec hyperparameters
+- `output`: manifest and reports directories
+- `analysis`: target groups, framing lexicons, parser model, context window, analysis output paths
+- `wefe`: reusable word sets and named WEFE experiments
+
+See [project.example.yaml](/home/nakulheroor/dev/wefe/configs/project.example.yaml) for the current full example.
+
+## Analysis outputs
+
+`analyze-representation` writes:
+
+- sentence-level features to `analysis.outputs.sentence_features_path`
+- article/group aggregates to `analysis.outputs.article_group_features_path`
+
+Current representation outputs include:
+
+- target-group mention detection
+- framing lexicon hit counts
+- active/passive voice flags
+- quote-aware context flags
+- article/group aggregate counts and rates
+- a composite `dehumanization_score`
+
+The analyzer supports:
+
+- German single-word lexicons
+- German multiword phrase lexicons
+- parser-backed sentence segmentation and dependency cues
+- heuristic fallback when the parser is unavailable
+
+## WEFE outputs
+
+`train-embeddings` writes a trained embedding model to `embeddings.path`.
+
+`run-wefe` writes:
+
+- `reports/wefe_results.csv`
+
+Current WEFE flow:
+
+- trains static Word2Vec embeddings from `data/processed/text`
+- loads embeddings from disk
+- builds configured WEFE queries from `wefe.word_sets` and `wefe.experiments`
+- runs WEAT-based experiments
+- exports result rows for each configured experiment
+
+## Notes and limitations
+
+- The corpus and analysis defaults are currently German-oriented.
+- The `extract-pdfs` command name is historical; it now ingests both PDFs and raw text.
+- The representation analysis is stronger than the initial heuristic version, but it is still a lightweight feature extractor rather than a full discourse model.
+- WEFE currently uses static embeddings trained from the processed corpus. That is a baseline, not the final word for a serious research setup.
+- The repo includes a local NumPy compatibility shim for the current `wefe` package version in this environment.
+
+## Repository layout
 
 ```text
 configs/                  Example YAML configuration
 src/wefe_news_analysis/   Application package
-tests/                    Initial test coverage
-data/                     Expected raw/processed corpus directories
-reports/                  Future metrics and exported evaluation results
+tests/                    Automated tests
+data/                     Expected raw and processed corpus directories
+models/                   Trained or imported embedding artifacts
+reports/                  Analysis and WEFE outputs
 ```

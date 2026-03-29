@@ -8,7 +8,7 @@ from rich.console import Console
 from .config import ProjectConfig
 from .pipeline import build_manifest, extract_pdfs
 from .representation import analyze_representation
-from .wefe_runner import build_query
+from .wefe_runner import build_query, export_wefe_results, run_all_wefe, train_embeddings
 
 app = typer.Typer(help="PDF-based newspaper text analysis scaffold for WEFE workflows.")
 console = Console()
@@ -42,6 +42,21 @@ def analyze_representation_command(
     sentence_path, article_group_path = analyze_representation(project_config)
     console.print(f"Sentence-level features written to {sentence_path}")
     console.print(f"Article/group features written to {article_group_path}")
+
+
+@app.command("train-embeddings")
+def train_embeddings_command(config: Path = typer.Option(..., exists=True, dir_okay=False)) -> None:
+    project_config = load_config(config)
+    model_path = train_embeddings(project_config)
+    console.print(f"Embeddings written to {model_path}")
+
+
+@app.command("run-wefe")
+def run_wefe_command(config: Path = typer.Option(..., exists=True, dir_okay=False)) -> None:
+    project_config = load_config(config)
+    results = run_all_wefe(project_config)
+    output_path = export_wefe_results(project_config, results)
+    console.print(f"WEFE results written to {output_path}")
 
 
 @app.command("show-query")

@@ -29,6 +29,11 @@ embeddings:
   format: "keyedvectors"
   binary: false
   model_name: "newspaper-keyedvectors"
+  vector_size: 100
+  window: 5
+  min_count: 1
+  epochs: 10
+  sg: 1
 
 output:
   manifest_path: "data/processed/articles_manifest.csv"
