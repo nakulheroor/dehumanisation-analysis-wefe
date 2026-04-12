@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -105,6 +106,54 @@ def wrap_model(model: Any, model_name: str = "custom-model") -> WordEmbeddingMod
     return WordEmbeddingModel(model, name=model_name)
 
 
+def summarize_query_vocabulary(query: Query, keyed_vectors: KeyedVectors) -> dict[str, dict[str, Any]]:
+    vocabulary = keyed_vectors.key_to_index
+    summary: dict[str, dict[str, Any]] = {}
+
+    named_sets = [
+        *zip(query.target_sets_names, query.target_sets, strict=False),
+        *zip(query.attribute_sets_names, query.attribute_sets, strict=False),
+    ]
+
+    for set_name, words in named_sets:
+        missing_words = [word for word in words if word not in vocabulary]
+        summary[set_name] = {
+            "total_words": len(words),
+            "missing_words": missing_words,
+            "missing_ratio": (len(missing_words) / len(words)) if words else 0.0,
+        }
+
+    return summary
+
+
+def format_missing_words_summary(vocabulary_summary: dict[str, dict[str, Any]]) -> str:
+    parts: list[str] = []
+    for set_name, stats in vocabulary_summary.items():
+        missing_words = stats["missing_words"]
+        if not missing_words:
+            continue
+        parts.append(f"{set_name}={','.join(missing_words)}")
+    return "; ".join(parts)
+
+
+def log_missing_query_words(
+    experiment_name: str, model_name: str, vocabulary_summary: dict[str, dict[str, Any]]
+) -> None:
+    for set_name, stats in vocabulary_summary.items():
+        missing_words = stats["missing_words"]
+        if not missing_words:
+            continue
+        logging.warning(
+            "WEFE experiment '%s' on embedding model '%s' is missing %d/%d words from set '%s': %s",
+            experiment_name,
+            model_name,
+            len(missing_words),
+            stats["total_words"],
+            set_name,
+            ", ".join(missing_words),
+        )
+
+
 def metric_factory():
     ensure_numpy_wefe_compatibility()
     from wefe.metrics import WEAT
@@ -116,6 +165,8 @@ def run_wefe(config: ProjectConfig, experiment_name: str | None = None) -> dict[
     experiment_key = resolve_experiment_name(config, experiment_name)
     query = build_query(config, experiment_key)
     keyed_vectors = load_embeddings(config)
+    vocabulary_summary = summarize_query_vocabulary(query, keyed_vectors)
+    log_missing_query_words(experiment_key, config.embeddings.model_name, vocabulary_summary)
     model = wrap_model(keyed_vectors, config.embeddings.model_name)
     metric = metric_factory()
     experiment = config.wefe.experiments[experiment_key]
@@ -123,6 +174,10 @@ def run_wefe(config: ProjectConfig, experiment_name: str | None = None) -> dict[
     result["experiment_name"] = experiment_key
     result["metric"] = experiment.metric
     result["embedding_model_name"] = config.embeddings.model_name
+    result["missing_word_count"] = sum(
+        len(stats["missing_words"]) for stats in vocabulary_summary.values()
+    )
+    result["missing_words_summary"] = format_missing_words_summary(vocabulary_summary)
     return result
 
 

@@ -78,6 +78,15 @@ def test_project_config_from_yaml(tmp_path: Path) -> None:
     assert "gender_career_bias" in config.wefe.experiments
 
 
+def test_project_example_yaml_is_valid() -> None:
+    config = ProjectConfig.from_yaml(Path("configs/project.example.yaml"))
+
+    assert "migration_groups" not in config.wefe.word_sets
+    assert "roma_people" not in config.wefe.word_sets
+    assert "general_journalists" in config.wefe.word_sets
+    assert "journalist_discrediting" in config.wefe.experiments
+
+
 def test_project_config_requires_corpus_language(tmp_path: Path) -> None:
     config_path = tmp_path / "project.yaml"
     config_path.write_text(valid_config_yaml().replace('  language: "german"\n', ""), encoding="utf-8")
@@ -102,6 +111,17 @@ def test_project_config_rejects_undefined_word_set_reference(tmp_path: Path) -> 
     )
 
     with pytest.raises(ValidationError, match="undefined word sets"):
+        ProjectConfig.from_yaml(config_path)
+
+
+def test_project_config_rejects_invalid_weat_cardinality(tmp_path: Path) -> None:
+    config_path = tmp_path / "project.yaml"
+    config_path.write_text(
+        valid_config_yaml().replace('["career_words", "family_words"]', '["career_words"]'),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValidationError, match="WEAT experiments must define exactly 2 target_sets"):
         ProjectConfig.from_yaml(config_path)
 
 

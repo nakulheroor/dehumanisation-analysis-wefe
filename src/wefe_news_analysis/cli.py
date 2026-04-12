@@ -6,7 +6,7 @@ import typer
 from rich.console import Console
 
 from .config import ProjectConfig
-from .pipeline import build_manifest, extract_pdfs
+from .pipeline import build_manifest, ingest_corpus
 from .representation import analyze_representation
 from .wefe_runner import build_query, export_wefe_results, run_all_wefe, train_embeddings
 
@@ -18,10 +18,10 @@ def load_config(config_path: Path) -> ProjectConfig:
     return ProjectConfig.from_yaml(config_path)
 
 
-@app.command("extract-pdfs")
-def extract_pdfs_command(config: Path = typer.Option(..., exists=True, dir_okay=False)) -> None:
+@app.command("ingest-corpus")
+def ingest_corpus_command(config: Path = typer.Option(..., exists=True, dir_okay=False)) -> None:
     project_config = load_config(config)
-    written_files = extract_pdfs(project_config)
+    written_files = ingest_corpus(project_config)
     console.print(
         f"Extracted {len(written_files)} article(s) into {project_config.corpus.processed_text_dir}"
     )
