@@ -95,6 +95,12 @@ wefe-news run-wefe --config configs/project.yaml
 wefe-news show-query --config configs/project.yaml --experiment journalist_discrediting
 ```
 
+7. Inspect which WEFE words are present or missing in the trained embedding vocabulary:
+
+```bash
+wefe-news inspect-vocab --config configs/project.yaml --experiment journalist_discrediting
+```
+
 ## Config overview
 
 The main config sections are:
@@ -146,6 +152,7 @@ Current WEFE flow:
 - trains static Word2Vec embeddings from `data/processed/text`
 - loads embeddings from disk
 - builds configured WEFE queries from `wefe.word_sets` and `wefe.experiments`
+- inspects configured WEFE words against the trained vocabulary when needed
 - runs WEAT-based experiments
 - exports result rows for each configured experiment
 

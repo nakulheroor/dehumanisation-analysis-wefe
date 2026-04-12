@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import logging
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -61,6 +62,13 @@ def tokenize_corpus_for_embeddings(config: ProjectConfig) -> list[list[str]]:
             f"No processed text files were found in {config.corpus.processed_text_dir} for embedding training."
         )
     return sentences
+
+
+def corpus_token_frequencies(config: ProjectConfig) -> Counter[str]:
+    counts: Counter[str] = Counter()
+    for sentence in tokenize_corpus_for_embeddings(config):
+        counts.update(sentence)
+    return counts
 
 
 def train_embeddings(config: ProjectConfig) -> Path:
@@ -152,6 +160,41 @@ def log_missing_query_words(
             set_name,
             ", ".join(missing_words),
         )
+
+
+def inspect_experiment_vocabulary(
+    config: ProjectConfig, experiment_name: str | None = None
+) -> dict[str, Any]:
+    experiment_key = resolve_experiment_name(config, experiment_name)
+    query = build_query(config, experiment_key)
+    keyed_vectors = load_embeddings(config)
+    frequencies = corpus_token_frequencies(config)
+    vocabulary_summary = summarize_query_vocabulary(query, keyed_vectors)
+
+    set_reports: list[dict[str, Any]] = []
+    named_sets = [
+        *zip(query.target_sets_names, query.target_sets, strict=False),
+        *zip(query.attribute_sets_names, query.attribute_sets, strict=False),
+    ]
+
+    for set_name, words in named_sets:
+        stats = vocabulary_summary[set_name]
+        set_reports.append(
+            {
+                "set_name": set_name,
+                "total_words": stats["total_words"],
+                "missing_words": stats["missing_words"],
+                "present_words": [word for word in words if word in keyed_vectors.key_to_index],
+                "missing_ratio": stats["missing_ratio"],
+                "corpus_counts": {word: frequencies.get(word, 0) for word in words},
+            }
+        )
+
+    return {
+        "experiment_name": experiment_key,
+        "embedding_model_name": config.embeddings.model_name,
+        "set_reports": set_reports,
+    }
 
 
 def metric_factory():
