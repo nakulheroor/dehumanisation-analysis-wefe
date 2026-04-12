@@ -1,0 +1,240 @@
+CSV Schema and Coding Criteria (Explicit German Keyword Version)
+
+1) Purpose
+This coding framework extracts sentence-level indicators from German newspaper text to identify:
+- harmful events,
+- affected targets,
+- alleged perpetrators,
+- attribution/source patterns.
+
+One row in the CSV = one sentence that matched at least one event rule.
+
+2) Column Definitions
+- journal: outlet name (e.g., SZ, Spiegel, Zeit, TAZ)
+- file: source filename
+- sentence: original sentence text
+- events: list of matched event categories
+- targets: list of matched target categories
+- perpetrators: list of matched perpetrator categories
+- attributions: list of matched attribution categories
+- optional: event__<category> one-hot columns (0/1)
+- optional: primary_event = first matched event label
+
+Fallback values:
+- targets = [unspecified_target] if no target keyword matched
+- perpetrators = [unspecified_perpetrator] if no perpetrator keyword matched
+- attributions = [no_explicit_attribution] if no source keyword matched
+
+3) Event Categories and German Keywords
+
+A) killing
+Typical German triggers:
+- getötet, getoetet
+- erschossen
+- umgebracht
+- tot
+- starb, gestorben
+- tödlich, toedlich
+
+B) injury_maiming
+Typical German triggers:
+- verletzt
+- verwundet
+- verstümmelt, verstuemmelt
+
+C) arrest_detention
+Typical German triggers:
+- festgenommen
+- verhaftet
+- inhaftiert
+- in Haft
+- festgehalten
+- willkürlich festgehalten / willkuerlich festgehalten
+
+D) disappearance
+Typical German triggers:
+- verschwunden
+- verschleppt
+- Zwangsverschwinden
+
+E) threat_harassment
+Typical German triggers:
+- bedroht / Bedrohung (careful: context-sensitive)
+- eingeschüchtert / eingeschaechtert
+- Schikane
+- belästigt / belaestigt
+- intimidiert
+
+F) infrastructure_destruction
+Typical German triggers (attack + media/telecom object):
+- zerstört / zerstoert
+- bombardiert
+- angegriffen
+- beschossen
+with objects such as:
+- Redaktion, Medienhaus, Sender, Studio, Pressebüro/Pressebuero
+- Telekommunikation, Internet, Netz
+and disruption words:
+- Ausfall, unterbrochen, abgeschaltet, blackout
+
+G) equipment_confiscation
+Typical German triggers:
+- konfisziert
+- beschlagnahmt
+- sichergestellt
+- entzogen
+with objects such as:
+- Kamera, Ausrüstung/Ausruestung, Equipment, Telefon, Laptop, Material
+
+H) foreign_press_exclusion
+Typical German triggers:
+- ausgewiesen
+- nicht zugelassen
+- Zugang verweigert
+- Einreiseverbot
+- Akkreditierung entzogen
+with target terms such as:
+- Auslandsjournalisten, ausländische Journalisten/auslaendische Journalisten
+- internationale Presse
+
+I) label_terrorist_or_hamas
+Typical German triggers (journalist/media near delegitimizing label):
+- Journalist/Reporter/Medien … Terrorist
+- Journalist/Reporter/Medien … Hamas-Kämpfer / Hamas-Kaempfer
+- mit Hamas verbunden (when used as label against media actor)
+
+J) family_targeting
+Typical German triggers:
+family terms:
+- Familie, Angehörige/Angehoerige, Kinder, Ehefrau, Ehemann
+near harm terms:
+- getötet, verletzt, bedroht, festgenommen, verhaftet
+
+4) Target Categories and German Keywords
+
+A) journalist_media_worker
+- Journalist, Journalistin, Journalisten
+- Reporter
+- Korrespondent
+- Fotograf, Kameramann
+- Medienarbeiter
+- Pressevertreter
+
+B) media_institution
+- Redaktion
+- Sender
+- Medienhaus
+- Agentur
+- Nachrichtenbüro/Nachrichtenbuero
+- Pressebüro/Pressebuero
+- Studio
+
+C) family_member
+- Familie
+- Angehörige/Angehoerige
+- Kind/Kinder
+- Ehefrau, Ehemann
+
+D) generic_civilians (if enabled)
+- Menschen
+- Personen
+- Zivilist(en)
+- Opfer
+- Bevölkerung/Bevoelkerung
+- Einwohner
+
+E) palestinian_people (if enabled)
+- Palästinenser / Palaestinenser / Palestinenser
+- Gaza (context-dependent)
+
+F) israeli_people (if enabled)
+- Israelis
+- israelische Zivilisten
+
+5) Perpetrator Categories and German Keywords
+
+A) israeli_state_forces
+- IDF
+- israelische Armee
+- israelisches Militär/Militaer
+- israelische Streitkräfte/Streitkraefte
+- israelische Soldaten
+- israelische Polizei
+- israelische Sicherheitskräfte/Sicherheitskraefte
+- Geheimdienst (Israeli context), Shin Bet
+
+B) palestinian_armed_groups
+- Hamas
+- Islamischer Dschihad
+- PIJ
+- Qassam / al-Qassam
+- bewaffnete palästinensische Gruppen
+
+C) israeli_settlers
+- Siedler
+- israelische Siedler
+- settlers
+
+D) other_state_or_foreign_forces
+- ägyptische Kräfte/aegyptische kraefte
+- US-Militär
+- iranische Kräfte
+- Huthi
+- Hisbollah/Hezbollah
+
+E) attackers_unspecified / unknown gunmen
+- Angreifer
+- Täter/Taeter
+- Bewaffnete
+- unbekannte Bewaffnete
+- Mob
+- stürmten/stuermten
+- überfielen/ueberfielen
+- Anschlag, Attentat, Bombenanschlag
+
+F) unspecified_perpetrator
+- assigned when no perpetrator keyword is found in sentence.
+
+6) Attribution Categories and German Keywords
+
+A) according_to_israeli_officials
+Trigger forms:
+- laut … IDF
+- laut … israelische Armee / Regierung / Militär / Polizei
+- nach Angaben von … IDF / israelischen Behörden
+
+B) according_to_palestinian_officials_or_groups
+Trigger forms:
+- laut … Hamas
+- nach Angaben von … Hamas
+- laut/nach Angaben des Gesundheitsministeriums in Gaza
+- laut palästinensischen Behörden
+
+C) according_to_un_ngo_intl
+Trigger forms:
+- laut/nach Angaben der Vereinten Nationen
+- laut einem Bericht der Vereinten Nationen
+- laut UN, UNRWA
+- laut Amnesty, Human Rights Watch, IKRK, Rotes Kreuz, CPJ, RSF
+
+D) according_to_witnesses
+Trigger forms:
+- laut Zeugen
+- laut Augenzeugen
+
+E) no_explicit_attribution
+- assigned when no attribution trigger is detected.
+
+7) Matching Logic Summary
+- Sentence-level extraction: rules are applied per sentence.
+- Regex pattern matching with German spelling variants (including umlaut alternatives where possible).
+- Some rules use proximity constraints (e.g., keyword A within X characters of keyword B).
+- Multiple labels per sentence are allowed (multi-label design).
+- If no match for target/perpetrator/attribution, fallback “unspecified/no_explicit” labels are assigned.
+
+8) Important Limitations
+- Keyword matching does not resolve all pronouns/coreference (“sie”, “beide”, “er”).
+- Passive voice can hide actor identity.
+- Some terms (e.g., “Bedrohung”) can cause false positives without strict context constraints.
+- Output indicates textual mention patterns, not legal responsibility or legal conclusions.
+- Manual validation is required for high-stakes reporting.
