@@ -166,6 +166,15 @@ class WefeExperimentConfig(BaseModel):
             raise ValueError(f"{info.field_name} must contain at least one word set reference.")
         return cleaned
 
+    @model_validator(mode="after")
+    def validate_metric_cardinality(self) -> "WefeExperimentConfig":
+        if self.metric.upper() == "WEAT":
+            if len(self.target_sets) != 2:
+                raise ValueError("WEAT experiments must define exactly 2 target_sets.")
+            if len(self.attribute_sets) != 2:
+                raise ValueError("WEAT experiments must define exactly 2 attribute_sets.")
+        return self
+
 
 class WefeConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")

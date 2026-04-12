@@ -3,8 +3,10 @@ project:
 
 corpus:
   raw_pdf_dir: "data/raw/pdfs"
+  raw_text_dir: "data/raw/text"
   processed_text_dir: "data/processed/text"
   article_glob: "*.pdf"
+  text_glob: "*.txt"
   language: "german"
   default_encoding: "utf-8"
 
@@ -55,6 +57,7 @@ analysis:
 wefe:
   word_sets:
     palestinian_journalists: ["palästinensische", "journalisten", "gaza", "medienarbeiter"]
+    general_journalists: ["journalisten", "reporter", "korrespondenten", "medien"]
     dehumanizing_terms: ["flut", "welle", "plage", "parasiten", "ungeziefer", "invasion"]
     collectivizing_terms: ["feind", "feindvolk", "masse", "welle", "flut"]
     erasure_civilian_status_terms: ["hamas-nah", "nicht-zivilisten", "schutzschild"]
@@ -66,23 +69,8 @@ wefe:
     victimizing_terms: ["opfer", "schutzlos", "vertrieben", "leidend", "hilflos"]
     humanizing_terms: ["familie", "arbeiter", "gemeinschaft", "nachbar", "mensch", "menschen", "zivilisten"]
   experiments:
-    migration_dehumanization:
-      metric: "WEAT"
-      description: "Compare migration-related groups against dehumanizing versus humanizing framing."
-      target_sets: ["migration_groups", "roma_people"]
-      attribute_sets: ["dehumanizing_terms", "humanizing_terms"]
-    migration_collectivization:
-      metric: "WEAT"
-      description: "Compare migration-related groups against collectivizing versus humanizing framing."
-      target_sets: ["migration_groups", "roma_people"]
-      attribute_sets: ["collectivizing_terms", "humanizing_terms"]
     journalist_discrediting:
       metric: "WEAT"
-      description: "Compare Palestinian journalist references against discrediting versus humanizing framing."
-      target_sets: ["palestinian_journalists", "migration_groups"]
+      description: "Compare Palestinian journalist references against general journalist references under discrediting versus humanizing framing."
+      target_sets: ["palestinian_journalists", "general_journalists"]
       attribute_sets: ["discrediting_journalist_terms", "humanizing_terms"]
-    civilian_erasure:
-      metric: "WEAT"
-      description: "Compare migration-related groups against civilian-erasure versus humanizing framing."
-      target_sets: ["migration_groups", "roma_people"]
-      attribute_sets: ["erasure_civilian_status_terms", "humanizing_terms"]

@@ -59,13 +59,11 @@ Processed outputs are written under:
 
 ## CLI workflow
 
-1. Extract and preprocess the corpus:
+1. Ingest and preprocess the corpus:
 
 ```bash
-wefe-news extract-pdfs --config configs/project.yaml
+wefe-news ingest-corpus --config configs/project.yaml
 ```
-
-Despite the command name, this ingests both PDFs and raw `.txt` inputs.
 
 2. Build a manifest:
 
@@ -94,7 +92,7 @@ wefe-news run-wefe --config configs/project.yaml
 6. Inspect a configured WEFE query:
 
 ```bash
-wefe-news show-query --config configs/project.yaml --experiment migration_dehumanization
+wefe-news show-query --config configs/project.yaml --experiment journalist_discrediting
 ```
 
 ## Config overview
@@ -154,7 +152,7 @@ Current WEFE flow:
 ## Notes and limitations
 
 - The corpus and analysis defaults are currently German-oriented.
-- The `extract-pdfs` command name is historical; it now ingests both PDFs and raw text.
+- `ingest-corpus` reads both PDFs and raw text inputs, then writes normalized `.txt` files to `data/processed/text`.
 - The representation analysis is stronger than the initial heuristic version, but it is still a lightweight feature extractor rather than a full discourse model.
 - WEFE currently uses static embeddings trained from the processed corpus. That is a baseline, not the final word for a serious research setup.
 - The repo includes a local NumPy compatibility shim for the current `wefe` package version in this environment.

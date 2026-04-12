@@ -13,7 +13,7 @@ from wefe_news_analysis.config import (
     WefeConfig,
     WefeExperimentConfig,
 )
-from wefe_news_analysis.pipeline import build_manifest, ensure_directories, extract_pdfs, preprocess_text
+from wefe_news_analysis.pipeline import build_manifest, ensure_directories, ingest_corpus, preprocess_text
 
 
 def make_config(tmp_path: Path, sidecar_csv_path: Path | None = None) -> ProjectConfig:
@@ -108,7 +108,7 @@ def test_preprocess_text_applies_configured_cleanup(tmp_path: Path) -> None:
     assert processed == "finanzen haus"
 
 
-def test_extract_pdfs_also_ingests_raw_text_files(tmp_path: Path) -> None:
+def test_ingest_corpus_also_ingests_raw_text_files(tmp_path: Path) -> None:
     config = make_config(tmp_path)
     ensure_directories(config)
     config.corpus.raw_text_dir.mkdir(parents=True, exist_ok=True)
@@ -117,7 +117,7 @@ def test_extract_pdfs_also_ingests_raw_text_files(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    written_files = extract_pdfs(config)
+    written_files = ingest_corpus(config)
 
     output_path = config.corpus.processed_text_dir / "artikel_1.txt"
     assert output_path in written_files

@@ -160,7 +160,7 @@ def load_metadata_rows(config: ProjectConfig) -> dict[str, dict[str, str]]:
         return rows
 
 
-def extract_pdfs(config: ProjectConfig) -> list[Path]:
+def ingest_corpus(config: ProjectConfig) -> list[Path]:
     ensure_directories(config)
     written_files: list[Path] = []
 
