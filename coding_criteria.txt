@@ -1,240 +1,126 @@
-CSV Schema and Coding Criteria (Explicit German Keyword Version)
+CSV SCHEMA + CODING CRITERIA
+============================
 
-1) Purpose
-This coding framework extracts sentence-level indicators from German newspaper text to identify:
-- harmful events,
-- affected targets,
-- alleged perpetrators,
-- attribution/source patterns.
+File purpose
+------------
+This CSV contains sentence-level extractions from newspaper text for event coding related to harms against journalists/media ecosystem and related conflict reporting.
 
-One row in the CSV = one sentence that matched at least one event rule.
+Unit of analysis
+----------------
+- One row = one sentence that matched at least one EVENT pattern.
 
-2) Column Definitions
-- journal: outlet name (e.g., SZ, Spiegel, Zeit, TAZ)
-- file: source filename
-- sentence: original sentence text
-- events: list of matched event categories
-- targets: list of matched target categories
-- perpetrators: list of matched perpetrator categories
-- attributions: list of matched attribution categories
-- optional: event__<category> one-hot columns (0/1)
-- optional: primary_event = first matched event label
+Column definitions
+------------------
 
-Fallback values:
-- targets = [unspecified_target] if no target keyword matched
-- perpetrators = [unspecified_perpetrator] if no perpetrator keyword matched
-- attributions = [no_explicit_attribution] if no source keyword matched
+journal
+- Outlet label from JOURNAL_DIRS key (e.g., SZ, Zeit, Spiegel, TAZ).
 
-3) Event Categories and German Keywords
+file
+- Source text filename.
 
-A) killing
-Typical German triggers:
-- getötet, getoetet
-- erschossen
-- umgebracht
-- tot
-- starb, gestorben
-- tödlich, toedlich
+sentence
+- Original sentence text (as split by regex sentence splitter).
 
-B) injury_maiming
-Typical German triggers:
-- verletzt
-- verwundet
-- verstümmelt, verstuemmelt
+events
+- List of matched EVENT categories.
+- A sentence may contain multiple event labels.
 
-C) arrest_detention
-Typical German triggers:
-- festgenommen
-- verhaftet
-- inhaftiert
-- in Haft
-- festgehalten
-- willkürlich festgehalten / willkuerlich festgehalten
+targets
+- List of matched target categories (who is affected).
+- If no target pattern is found, value is ['unspecified_target'].
 
-D) disappearance
-Typical German triggers:
-- verschwunden
-- verschleppt
-- Zwangsverschwinden
+perpetrators
+- List of matched perpetrator categories (who allegedly committed the act).
+- If no perpetrator pattern is found, value is ['unspecified_perpetrator'].
+- If multiple perpetrator categories matched, list may include multiple labels.
 
-E) threat_harassment
-Typical German triggers:
-- bedroht / Bedrohung (careful: context-sensitive)
-- eingeschüchtert / eingeschaechtert
-- Schikane
-- belästigt / belaestigt
-- intimidiert
+attributions
+- List of matched source-attribution categories (e.g., 'according_to_un_ngo_intl').
+- If no explicit attribution pattern is found, value is ['no_explicit_attribution'].
 
-F) infrastructure_destruction
-Typical German triggers (attack + media/telecom object):
-- zerstört / zerstoert
-- bombardiert
-- angegriffen
-- beschossen
-with objects such as:
-- Redaktion, Medienhaus, Sender, Studio, Pressebüro/Pressebuero
-- Telekommunikation, Internet, Netz
-and disruption words:
-- Ausfall, unterbrochen, abgeschaltet, blackout
+event__<label>  (optional one-hot columns)
+- Binary indicator (0/1) that event label is present in the row.
 
-G) equipment_confiscation
-Typical German triggers:
-- konfisziert
-- beschlagnahmt
-- sichergestellt
-- entzogen
-with objects such as:
-- Kamera, Ausrüstung/Ausruestung, Equipment, Telefon, Laptop, Material
+primary_event (optional)
+- First event label in the matched events list (or 'none' if empty).
 
-H) foreign_press_exclusion
-Typical German triggers:
-- ausgewiesen
-- nicht zugelassen
-- Zugang verweigert
-- Einreiseverbot
-- Akkreditierung entzogen
-with target terms such as:
-- Auslandsjournalisten, ausländische Journalisten/auslaendische Journalisten
-- internationale Presse
+Event category criteria
+-----------------------
+killing
+- Terms indicating death/homicide (e.g., getötet, erschossen, tot, gestorben).
 
-I) label_terrorist_or_hamas
-Typical German triggers (journalist/media near delegitimizing label):
-- Journalist/Reporter/Medien … Terrorist
-- Journalist/Reporter/Medien … Hamas-Kämpfer / Hamas-Kaempfer
-- mit Hamas verbunden (when used as label against media actor)
+injury_maiming
+- Terms indicating injury/wounding/mutilation.
 
-J) family_targeting
-Typical German triggers:
-family terms:
-- Familie, Angehörige/Angehoerige, Kinder, Ehefrau, Ehemann
-near harm terms:
-- getötet, verletzt, bedroht, festgenommen, verhaftet
+arrest_detention
+- Terms indicating arrest, detention, imprisonment.
 
-4) Target Categories and German Keywords
+disappearance
+- Terms indicating disappearance/abduction where fate/location is unknown.
 
-A) journalist_media_worker
-- Journalist, Journalistin, Journalisten
-- Reporter
-- Korrespondent
-- Fotograf, Kameramann
-- Medienarbeiter
-- Pressevertreter
+threat_harassment
+- Terms indicating threat/intimidation/harassment (depending on pattern constraints).
 
-B) media_institution
-- Redaktion
-- Sender
-- Medienhaus
-- Agentur
-- Nachrichtenbüro/Nachrichtenbuero
-- Pressebüro/Pressebuero
-- Studio
+infrastructure_destruction
+- Attack/destruction/disruption references tied to media/telecom infrastructure.
 
-C) family_member
-- Familie
-- Angehörige/Angehoerige
-- Kind/Kinder
-- Ehefrau, Ehemann
+equipment_confiscation
+- Confiscation/seizure/removal of journalistic equipment.
 
-D) generic_civilians (if enabled)
-- Menschen
-- Personen
-- Zivilist(en)
-- Opfer
-- Bevölkerung/Bevoelkerung
-- Einwohner
+foreign_press_exclusion
+- Exclusion/expulsion/access denial of foreign journalists/press.
 
-E) palestinian_people (if enabled)
-- Palästinenser / Palaestinenser / Palestinenser
-- Gaza (context-dependent)
+label_terrorist_or_hamas
+- Statements labeling journalists/media workers as terrorist/Hamas-fighter etc.
 
-F) israeli_people (if enabled)
-- Israelis
-- israelische Zivilisten
+family_targeting
+- Harm/threat/arrest language targeting family members.
 
-5) Perpetrator Categories and German Keywords
+Target category criteria
+------------------------
+journalist_media_worker
+- Mentions of journalists/reporters/photojournalists/correspondents/media workers.
 
-A) israeli_state_forces
-- IDF
-- israelische Armee
-- israelisches Militär/Militaer
-- israelische Streitkräfte/Streitkraefte
-- israelische Soldaten
-- israelische Polizei
-- israelische Sicherheitskräfte/Sicherheitskraefte
-- Geheimdienst (Israeli context), Shin Bet
+media_institution
+- Mentions of newsroom/media house/agency/studio/press office.
 
-B) palestinian_armed_groups
-- Hamas
-- Islamischer Dschihad
-- PIJ
-- Qassam / al-Qassam
-- bewaffnete palästinensische Gruppen
+family_member
+- Mentions of family/relatives/spouse/children.
 
-C) israeli_settlers
-- Siedler
-- israelische Siedler
-- settlers
+generic_civilians / palestinian_people / israeli_people (if enabled)
+- Broader civilian identity group mentions.
 
-D) other_state_or_foreign_forces
-- ägyptische Kräfte/aegyptische kraefte
-- US-Militär
-- iranische Kräfte
-- Huthi
-- Hisbollah/Hezbollah
+Perpetrator category criteria
+-----------------------------
+israeli_state_forces
+- IDF, Israeli military/police/security/intelligence references.
 
-E) attackers_unspecified / unknown gunmen
-- Angreifer
-- Täter/Taeter
-- Bewaffnete
-- unbekannte Bewaffnete
-- Mob
-- stürmten/stuermten
-- überfielen/ueberfielen
-- Anschlag, Attentat, Bombenanschlag
+palestinian_armed_groups
+- Hamas/PIJ/Qassam/related armed group references.
 
-F) unspecified_perpetrator
-- assigned when no perpetrator keyword is found in sentence.
+israeli_settlers
+- Settler actor references.
 
-6) Attribution Categories and German Keywords
+other_state_or_foreign_forces
+- Other named state/non-local armed actors.
 
-A) according_to_israeli_officials
-Trigger forms:
-- laut … IDF
-- laut … israelische Armee / Regierung / Militär / Polizei
-- nach Angaben von … IDF / israelischen Behörden
+attackers_unspecified / civilian_mob_or_unknown_gunmen
+- Generic attacker descriptions without clear institutional actor.
 
-B) according_to_palestinian_officials_or_groups
-Trigger forms:
-- laut … Hamas
-- nach Angaben von … Hamas
-- laut/nach Angaben des Gesundheitsministeriums in Gaza
-- laut palästinensischen Behörden
+unspecified_perpetrator
+- No perpetrator cue detected in sentence.
 
-C) according_to_un_ngo_intl
-Trigger forms:
-- laut/nach Angaben der Vereinten Nationen
-- laut einem Bericht der Vereinten Nationen
-- laut UN, UNRWA
-- laut Amnesty, Human Rights Watch, IKRK, Rotes Kreuz, CPJ, RSF
+Attribution category criteria
+-----------------------------
+according_to_israeli_officials
+according_to_palestinian_officials_or_groups
+according_to_un_ngo_intl
+according_to_witnesses
+no_explicit_attribution
 
-D) according_to_witnesses
-Trigger forms:
-- laut Zeugen
-- laut Augenzeugen
-
-E) no_explicit_attribution
-- assigned when no attribution trigger is detected.
-
-7) Matching Logic Summary
-- Sentence-level extraction: rules are applied per sentence.
-- Regex pattern matching with German spelling variants (including umlaut alternatives where possible).
-- Some rules use proximity constraints (e.g., keyword A within X characters of keyword B).
-- Multiple labels per sentence are allowed (multi-label design).
-- If no match for target/perpetrator/attribution, fallback “unspecified/no_explicit” labels are assigned.
-
-8) Important Limitations
-- Keyword matching does not resolve all pronouns/coreference (“sie”, “beide”, “er”).
-- Passive voice can hide actor identity.
-- Some terms (e.g., “Bedrohung”) can cause false positives without strict context constraints.
-- Output indicates textual mention patterns, not legal responsibility or legal conclusions.
-- Manual validation is required for high-stakes reporting.
+Method limitations
+------------------
+- Regex-based matching: sensitive to wording and may miss paraphrases.
+- Sentence-level scope: cross-sentence coreference may be missed.
+- Categories indicate textual mention patterns, not legal findings.
+- Manual validation is required before substantive claims.
