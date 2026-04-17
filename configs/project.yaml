@@ -3,7 +3,7 @@ project:
 
 corpus:
   raw_pdf_dir: "data/raw/pdfs"
-  processed_text_dir: "data/processed/text"
+  processed_text_dir: "data/raw/sz_txt"
   article_glob: "*.pdf"
   language: "german"
   default_encoding: "utf-8"
@@ -65,6 +65,10 @@ wefe:
     censorship_repression_terms: ["einschüchterung", "zensur", "informationssperre", "zugangsverbot"]
     victimizing_terms: ["opfer", "schutzlos", "vertrieben", "leidend", "hilflos"]
     humanizing_terms: ["familie", "arbeiter", "gemeinschaft", "nachbar", "mensch", "menschen", "zivilisten"]
+
+    migration_groups: ["migranten", "flüchtlinge", "asylbewerber", "zuwanderer", "einwanderer"]
+    roma_people: ["roma", "romani", "sinti"]
+
   experiments:
     migration_dehumanization:
       metric: "WEAT"
