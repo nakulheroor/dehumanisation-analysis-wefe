@@ -81,6 +81,14 @@ def parse_args() -> argparse.Namespace:
         default=1,
         help="Number of parallel worker threads for API requests. Defaults to 1.",
     )
+    parser.add_argument(
+        "--pass-prompt",
+        action="store_true",
+        help=(
+            "Pass the full rubric markdown file directly as the prompt instead of "
+            "building the prompt and schema from the rubric JSON block."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -157,7 +165,7 @@ def run_single_article(
     source_path: Path,
     output_path: Path,
     prompt: str,
-    schema: dict,
+    schema: dict | None,
     model: str | None,
 ) -> tuple[bool, str | None, dict]:
     try:
@@ -198,6 +206,10 @@ def append_usage(usage_log_path: Path, usage_record: dict, lock: Lock) -> None:
             handle.write(json.dumps(usage_record, ensure_ascii=False) + "\n")
 
 
+def load_prompt_text(prompt_path: str | Path) -> str:
+    return Path(prompt_path).read_text(encoding="utf-8")
+
+
 def main() -> int:
     try:
         from dotenv import load_dotenv
@@ -232,9 +244,14 @@ def main() -> int:
     error_log_path = Path(args.error_log) if args.error_log else output_dir / "batch_errors.log"
     usage_log_path = output_dir / "batch_usage.jsonl"
     fetcher = build_fetcher("text-file")
-    rubric = load_rubric(resolve_rubric_path(args))
-    prompt = rubric_prompt(rubric)
-    schema = rubric_to_schema(rubric)
+    rubric_path = resolve_rubric_path(args)
+    if args.pass_prompt:
+        prompt = load_prompt_text(rubric_path)
+        schema = None
+    else:
+        rubric = load_rubric(rubric_path)
+        prompt = rubric_prompt(rubric)
+        schema = rubric_to_schema(rubric)
 
     all_files = collect_input_files(input_dir)
     if not all_files:
@@ -268,6 +285,11 @@ def main() -> int:
     print(f"Selected batch size: {len(batch_files)} article(s)")
     print(f"Global indices covered by this batch: {selected_start} to {selected_end}")
     print(f"Parallel workers: {args.workers}")
+    print(f"Prompt source: {rubric_path}")
+    if args.pass_prompt:
+        print("Prompt mode: passing full rubric markdown directly to the model.")
+    else:
+        print("Prompt mode: building prompt and schema from the rubric JSON block.")
     print(f"Writing JSON outputs to {output_dir}")
     if not args.overwrite:
         print("Existing outputs are being skipped. Use --overwrite to re-run them.")

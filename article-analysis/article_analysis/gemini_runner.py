@@ -40,7 +40,7 @@ def analyze_with_gemini_api(
     article_url: str,
     article_text: str,
     prompt: str,
-    schema: dict,
+    schema: dict | None,
     model: str | None = None,
 ) -> GeminiAnalysisResult:
     from google.genai import types
@@ -56,13 +56,14 @@ def analyze_with_gemini_api(
         ]
     )
 
+    config_kwargs = {"response_mime_type": "application/json"}
+    if schema is not None:
+        config_kwargs["response_schema"] = schema
+
     response = client.models.generate_content(
         model=model or DEFAULT_GEMINI_MODEL,
         contents=full_prompt,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            response_schema=schema,
-        ),
+        config=types.GenerateContentConfig(**config_kwargs),
     )
 
     parsed_json = _parse_response_json(response)
