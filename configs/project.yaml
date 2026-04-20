@@ -2,20 +2,15 @@ project:
   name: "newspaper-bias-audit"
 
 corpus:
-  raw_pdf_dir: "data/raw/pdfs"
-<<<<<<< HEAD
+  raw_pdf_dir: "data/raw/sz_txt"
   processed_text_dir: "data/raw/sz_txt"
-=======
-  raw_text_dir: "data/raw/text"
-  processed_text_dir: "data/processed/text"
->>>>>>> da18899b941d2cdfd6a5f1880d38e003deb700e3
   article_glob: "*.pdf"
   text_glob: "*.txt"
   language: "german"
   default_encoding: "utf-8"
 
 metadata:
-  sidecar_csv_path: "data/raw/article_metadata.csv"
+  sidecar_csv_path: null
   id_column: "article_id"
 
 preprocessing:
@@ -40,7 +35,10 @@ output:
 
 analysis:
   target_groups:
+    palestinians: ["palästinenser", "palästinensische", "gaza", "palästina"]
+    israelis: ["israelis", "israelische", "israel"]
     palestinian_journalists: ["palästinensische journalisten", "journalisten aus gaza", "medienarbeiter aus gaza"]
+    general_journalists: ["journalisten", "reporter", "korrespondenten", "medien"]
   framing_lexicons:
     dehumanizing: ["flut", "welle", "plage", "parasiten", "ungeziefer", "invasion"]
     criminalizing: ["illegal", "kriminalität", "kriminell", "bande", "bedrohung", "verdächtig"]
@@ -76,9 +74,32 @@ wefe:
     migration_groups: ["migranten", "flüchtlinge", "asylbewerber", "zuwanderer", "einwanderer"]
     roma_people: ["roma", "romani", "sinti"]
 
+    palestinians: ["palästinenser", "palästinensische", "gaza", "palästina"]
+    israelis: ["israelis", "israelische", "israel"]
+    terrorism_terms: ["terror", "terrorismus", "terroristen", "militante", "angriffe", "raketen", "gewalt", "bedrohung"]
+    defense_terms: ["verteidigung", "sicherheit", "opfer", "frieden", "humanität"]
+
   experiments:
     journalist_discrediting:
       metric: "WEAT"
       description: "Compare Palestinian journalist references against general journalist references under discrediting versus humanizing framing."
       target_sets: ["palestinian_journalists", "general_journalists"]
       attribute_sets: ["discrediting_journalist_terms", "humanizing_terms"]
+
+    palestinian_terrorism_bias:
+      metric: "WEAT"
+      description: "Measure bias by comparing association of Palestinians vs Israelis with terrorism terms vs defense terms. A positive effect size indicates Palestinians are more associated with terrorism than Israelis with defense."
+      target_sets: ["palestinians", "israelis"]
+      attribute_sets: ["terrorism_terms", "defense_terms"]
+
+    palestinian_dehumanization_bias:
+      metric: "WEAT"
+      description: "Assess dehumanization bias by comparing Palestinians and Israelis under dehumanizing vs humanizing terms."
+      target_sets: ["palestinians", "israelis"]
+      attribute_sets: ["dehumanizing_terms", "humanizing_terms"]
+
+    palestinian_criminalization_bias:
+      metric: "WEAT"
+      description: "Evaluate criminalization bias by comparing Palestinians and Israelis under criminalizing vs humanizing terms."
+      target_sets: ["palestinians", "israelis"]
+      attribute_sets: ["criminalizing_terms", "humanizing_terms"]
