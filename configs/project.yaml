@@ -56,21 +56,121 @@ analysis:
 
 wefe:
   word_sets:
-    palestinian_journalists: ["palästinensische", "journalisten", "gaza", "medienarbeiter"]
-    general_journalists: ["journalisten", "reporter", "korrespondenten", "medien"]
-    dehumanizing_terms: ["flut", "welle", "plage", "parasiten", "ungeziefer", "invasion"]
-    collectivizing_terms: ["feind", "feindvolk", "masse", "welle", "flut"]
-    erasure_civilian_status_terms: ["hamas-nah", "nicht-zivilisten", "schutzschild"]
-    criminalizing_terms: ["illegal", "kriminalität", "kriminell", "bande", "bedrohung", "verdächtig"]
-    displacement_terms: ["vertreiben", "umsiedeln", "zwangsumsiedlung"]
-    destruction_terms: ["auslöschen", "vernichten", "zerstören"]
-    discrediting_journalist_terms: ["terrorpropaganda", "hamas-sprachrohr", "falschmeldung"]
-    censorship_repression_terms: ["einschüchterung", "zensur", "informationssperre", "zugangsverbot"]
-    victimizing_terms: ["opfer", "schutzlos", "vertrieben", "leidend", "hilflos"]
-    humanizing_terms: ["familie", "arbeiter", "gemeinschaft", "nachbar", "mensch", "menschen", "zivilisten"]
+    palestinian_journalists: ["palästinensisch", "journalist", "journalisten", "reporter", "korrespondent", "presse", "medienarbeiter", "kamerateam"]
+    general_journalists: ["journalist", "journalisten", "reporter", "korrespondent", "redaktion", "presse", "medien", "auslandspresse"]
+    foreign_journalists: ["auslandsjournalisten", "auslandspresse", "auslandskorrespondenten", "ausländische", "reporter", "presse"]
+    palestinians: ["palästinenser", "palästinensern", "palästinensisch", "gaza", "gazastreifen", "gazaner"]
+    civilians: ["zivilisten", "bevölkerung", "familien", "anwohner", "kinder", "menschen"]
+    media_institutions: ["redaktion", "sender", "fernsehsender", "agentur", "nachrichtenbüro", "pressebüro", "medienhaus", "studio"]
+    media_infrastructure: ["studio", "kamera", "sender", "sendemast", "internet", "telefonnetz", "funknetz", "übertragung"]
+    family_members_of_journalists: ["angehörige", "familie", "familienmitglieder", "eltern", "kinder", "ehepartner", "verwandte"]
+    targeting_violence_terms: ["töten", "erschießen", "bombardieren", "angreifen", "beschuss", "verletzen", "verwunden", "verstümmeln"]
+    detention_disappearance_terms: ["festnehmen", "inhaftieren", "verhaften", "verschleppen", "verschwindenlassen", "haft", "gefangenschaft", "willkür"]
+    harassment_intimidation_terms: ["bedrohen", "einschüchtern", "belästigen", "schikanieren", "terrorisieren", "überwachen", "verfolgen", "drohen"]
+    infrastructure_destruction_terms: ["zerstören", "sprengen", "verwüsten", "durchsuchen", "plündern", "bombardieren", "razzia", "beschlagnahmen"]
+    telecom_disruption_terms: ["abschalten", "blockieren", "unterbrechen", "drosseln", "kappen", "stören", "sperren", "abschneiden"]
+    terrorist_labelling_terms: ["terrorist", "terroristen", "hamas-kämpfer", "hamasnah", "terrornah", "propagandist", "militant", "extremist"]
+    family_targeting_terms: ["angehörige", "familie", "familienmitglieder", "bedrohen", "töten", "einschüchtern", "bestrafen", "vergelten"]
+    exclusion_blackout_terms: ["aussperren", "ausweisen", "abweisen", "verweigern", "einreiseverbot", "zugangssperre", "nachrichtensperre", "abschottung"]
+    dehumanizing_terms: ["barbaren", "parasiten", "ungeziefer", "monster", "menschenmaterial", "welle", "flut", "plage"]
+    collectivizing_terms: ["feind", "feindvolk", "masse", "welle", "flut", "kollektivschuld", "gesamtheit", "block"]
+    erasure_civilian_status_terms: ["hamasnah", "terrorumfeld", "nichtzivilisten", "schutzschild", "mitschuldig", "feindvolk"]
+    criminalizing_terms: ["illegal", "kriminalität", "kriminell", "bande", "bedrohung", "verdächtig", "terrorverdacht", "sicherheitsrisiko"]
+    mass_displacement_terms: ["vertreiben", "umsiedeln", "deportieren", "verdrängen", "räumen", "transfer", "entvölkern", "evakuieren"]
+    destruction_gaza_terms: ["vernichten", "auslöschen", "einebnen", "plattmachen", "zerstören", "demolieren", "verwüsten", "ausradieren"]
+    editorial_line_terms: ["redaktionslinie", "leitlinie", "vorgabe", "sendelinie", "kampagne", "abgestimmt", "chefredaktion", "kommentariat"]
+    disinformation_terms: ["falschmeldung", "desinformation", "propaganda", "verleumdung", "delegitimierung", "diskreditierung", "lüge", "manipulation"]
+    genocide_incitement_terms: ["ausrotten", "vernichten", "auslöschen", "eliminieren", "tilgen", "restlos", "endlösung", "vertreiben"]
+    coded_incitement_terms: ["säubern", "ausmisten", "durchgreifen", "befrieden", "räumen", "abschrecken", "ordnung", "härte"]
+    censorship_retaliation_terms: ["zensur", "sendesperre", "verbot", "entlassung", "sanktion", "repressalie", "strafen", "einschüchterung"]
+    press_freedom_terms: ["pressefreiheit", "schutz", "unabhängigkeit", "berichterstattung", "journalismus", "dokumentation", "zeugen", "öffentlichkeit"]
+    editorial_independence_terms: ["redaktionsfreiheit", "unabhängigkeit", "sorgfalt", "faktenprüfung", "transparenz", "ethik", "quellenprüfung", "korrektur"]
+    civilian_protection_terms: ["zivilisten", "schutz", "völkerrecht", "humanitär", "menschenrechte", "rettung", "versorgung", "sicherheit"]
+    legal_accountability_terms: ["völkerrecht", "ermittlung", "beweise", "verantwortung", "haftung", "rechtsbruch", "kriegsverbrechen", "anordnung"]
+    humanizing_terms: ["familie", "arbeiter", "gemeinschaft", "nachbar", "mensch", "menschen", "zivilisten", "bewohner"]
   experiments:
-    journalist_discrediting:
+    journalist_targeting_violence:
       metric: "WEAT"
-      description: "Compare Palestinian journalist references against general journalist references under discrediting versus humanizing framing."
+      description: "Vergleicht palästinensische Journalistinnen und Journalisten mit allgemeinen journalistischen Referenzen unter Gewalt- versus Pressefreiheitsvokabular."
       target_sets: ["palestinian_journalists", "general_journalists"]
-      attribute_sets: ["discrediting_journalist_terms", "humanizing_terms"]
+      attribute_sets: ["targeting_violence_terms", "press_freedom_terms"]
+    journalist_detention_disappearance:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische Journalistinnen und Journalisten mit allgemeinen journalistischen Referenzen unter Haft-, Verschleppungs- und Repressionsvokabular."
+      target_sets: ["palestinian_journalists", "general_journalists"]
+      attribute_sets: ["detention_disappearance_terms", "press_freedom_terms"]
+    journalist_harassment_intimidation:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische Journalistinnen und Journalisten mit allgemeinen journalistischen Referenzen unter Einschüchterungs- versus Pressefreiheitsvokabular."
+      target_sets: ["palestinian_journalists", "general_journalists"]
+      attribute_sets: ["harassment_intimidation_terms", "press_freedom_terms"]
+    journalist_terror_labelling:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische Journalistinnen und Journalisten mit allgemeinen journalistischen Referenzen unter Terroretikettierungs- versus Pressefreiheitsvokabular."
+      target_sets: ["palestinian_journalists", "general_journalists"]
+      attribute_sets: ["terrorist_labelling_terms", "press_freedom_terms"]
+    journalist_family_targeting:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische Journalistinnen und Journalisten mit allgemeinen journalistischen Referenzen unter Familienbedrohungs- versus Pressefreiheitsvokabular."
+      target_sets: ["palestinian_journalists", "general_journalists"]
+      attribute_sets: ["family_targeting_terms", "press_freedom_terms"]
+    foreign_press_exclusion_blackout:
+      metric: "WEAT"
+      description: "Vergleicht ausländische Journalistinnen und Journalisten mit allgemeinen journalistischen Referenzen unter Ausschluss- und Informationssperrvokabular versus Pressefreiheitsvokabular."
+      target_sets: ["foreign_journalists", "general_journalists"]
+      attribute_sets: ["exclusion_blackout_terms", "press_freedom_terms"]
+    media_infrastructure_disruption:
+      metric: "WEAT"
+      description: "Vergleicht Medieninstitutionen mit Medieninfrastruktur unter Zerstörungs- und Telekommunikationsunterbrechungsvokabular versus Schutzvokabular."
+      target_sets: ["media_institutions", "media_infrastructure"]
+      attribute_sets: ["infrastructure_destruction_terms", "telecom_disruption_terms"]
+    palestinian_dehumanization:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische Referenzen mit zivilen Referenzen unter entmenschlichendem versus humanisierendem Vokabular."
+      target_sets: ["palestinians", "civilians"]
+      attribute_sets: ["dehumanizing_terms", "humanizing_terms"]
+    palestinian_civilian_erasure:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische Referenzen mit zivilen Referenzen unter Vokabular zur Aberkennung des Zivilstatus versus humanisierendem Vokabular."
+      target_sets: ["palestinians", "civilians"]
+      attribute_sets: ["erasure_civilian_status_terms", "humanizing_terms"]
+    mass_displacement_incitement:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische Referenzen mit zivilen Referenzen unter Vertreibungs- versus Schutzvokabular."
+      target_sets: ["palestinians", "civilians"]
+      attribute_sets: ["mass_displacement_terms", "civilian_protection_terms"]
+    gaza_destruction_incitement:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische Referenzen mit zivilen Referenzen unter Vernichtungs- versus Schutzvokabular."
+      target_sets: ["palestinians", "civilians"]
+      attribute_sets: ["destruction_gaza_terms", "civilian_protection_terms"]
+    genocide_incitement:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische Referenzen mit zivilen Referenzen unter Vokabular direkter Vernichtungsaufrufe versus Schutzvokabular."
+      target_sets: ["palestinians", "civilians"]
+      attribute_sets: ["genocide_incitement_terms", "civilian_protection_terms"]
+    coded_incitement:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische Referenzen mit zivilen Referenzen unter kodiertem Eskalationsvokabular versus Schutzvokabular."
+      target_sets: ["palestinians", "civilians"]
+      attribute_sets: ["coded_incitement_terms", "civilian_protection_terms"]
+    journalist_disinformation:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische Journalistinnen und Journalisten mit allgemeinen journalistischen Referenzen unter Diskreditierungs- und Desinformationsvokabular versus redaktioneller Unabhängigkeit."
+      target_sets: ["palestinian_journalists", "general_journalists"]
+      attribute_sets: ["disinformation_terms", "editorial_independence_terms"]
+    institutional_editorial_line:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische Referenzen mit zivilen Referenzen unter institutionalisiertem Redaktionslinienvokabular versus redaktioneller Unabhängigkeit."
+      target_sets: ["palestinians", "civilians"]
+      attribute_sets: ["editorial_line_terms", "editorial_independence_terms"]
+    censorship_retaliation:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische Journalistinnen und Journalisten mit allgemeinen journalistischen Referenzen unter Zensur- und Repressionsvokabular versus Pressefreiheitsvokabular."
+      target_sets: ["palestinian_journalists", "general_journalists"]
+      attribute_sets: ["censorship_retaliation_terms", "press_freedom_terms"]
+    legal_accountability_obscuring:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische Referenzen mit zivilen Referenzen unter Vokabular rechtlicher Verantwortlichkeit versus Desinformationsvokabular."
+      target_sets: ["palestinians", "civilians"]
+      attribute_sets: ["legal_accountability_terms", "disinformation_terms"]
