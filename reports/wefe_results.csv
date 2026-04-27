@@ -1,0 +1,10 @@
+query_name,result,weat,effect_size,experiment_name,metric,embedding_model_name
+migration_groups and roma_people wrt erasure_civilian_status_terms and humanizing_terms,nan,nan,nan,civilian_erasure,WEAT,newspaper-keyedvectors
+israel and palästina wrt blame_terms and conflict_terms,nan,nan,nan,israel_blame,WEAT,newspaper-keyedvectors
+israel and palästina wrt legitimacy_terms and illegitimacy_terms,nan,nan,nan,israel_legitimacy,WEAT,newspaper-keyedvectors
+israel and palästina wrt state_terms and militant_terms,nan,nan,nan,israel_state_militant,WEAT,newspaper-keyedvectors
+israel and palästina wrt victim_terms and agency_terms,nan,nan,nan,israel_victimhood,WEAT,newspaper-keyedvectors
+israel and palästina wrt violence_terms and neutral_terms,nan,nan,nan,israel_violence,WEAT,newspaper-keyedvectors
+palestinian_journalists and migration_groups wrt discrediting_journalist_terms and humanizing_terms,nan,nan,nan,journalist_discrediting,WEAT,newspaper-keyedvectors
+migration_groups and roma_people wrt collectivizing_terms and humanizing_terms,nan,nan,nan,migration_collectivization,WEAT,newspaper-keyedvectors
+migration_groups and roma_people wrt dehumanizing_terms and humanizing_terms,nan,nan,nan,migration_dehumanization,WEAT,newspaper-keyedvectors
