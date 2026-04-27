@@ -92,13 +92,13 @@ wefe-news run-wefe --config configs/project.yaml
 6. Inspect a configured WEFE query:
 
 ```bash
-wefe-news show-query --config configs/project.yaml --experiment journalist_discrediting
+wefe-news show-query --config configs/project.yaml --experiment journalist_disinformation
 ```
 
 7. Inspect which WEFE words are present or missing in the trained embedding vocabulary:
 
 ```bash
-wefe-news inspect-vocab --config configs/project.yaml --experiment journalist_discrediting
+wefe-news inspect-vocab --config configs/project.yaml --experiment journalist_disinformation
 ```
 
 ## Config overview

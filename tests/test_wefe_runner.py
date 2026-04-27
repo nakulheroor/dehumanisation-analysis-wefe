@@ -1,5 +1,7 @@
+from math import isnan
 from pathlib import Path
 
+import numpy as np
 import pytest
 from typer.testing import CliRunner
 
@@ -9,6 +11,7 @@ from wefe_news_analysis.wefe_runner import (
     build_query,
     format_missing_words_summary,
     resolve_experiment_name,
+    run_wefat,
     summarize_query_vocabulary,
 )
 
@@ -138,6 +141,125 @@ def test_summarize_query_vocabulary_reports_missing_words(tmp_path: Path) -> Non
     assert format_missing_words_summary(summary) == (
         "career_words=executive; family_words=home; male_terms=male; female_terms=woman"
     )
+
+
+def wefat_config_yaml() -> str:
+    return "\n".join(
+        [
+            "project:",
+            '  name: "demo"',
+            "corpus:",
+            '  raw_pdf_dir: "data/raw/pdfs"',
+            '  processed_text_dir: "data/processed/text"',
+            '  article_glob: "*.pdf"',
+            '  language: "german"',
+            '  default_encoding: "utf-8"',
+            "metadata:",
+            '  sidecar_csv_path: "data/raw/article_metadata.csv"',
+            '  id_column: "article_id"',
+            "preprocessing:",
+            "  normalize_unicode: true",
+            "  lowercase: true",
+            "  collapse_whitespace: true",
+            "  strip_punctuation: false",
+            "  strip_digits: false",
+            "  min_token_length: 1",
+            '  stopword_handling: "keep"',
+            "  ocr_cleanup: true",
+            "embeddings:",
+            '  path: "models/embeddings.kv"',
+            '  format: "keyedvectors"',
+            "  binary: false",
+            '  model_name: "demo-model"',
+            "output:",
+            '  manifest_path: "data/processed/articles_manifest.csv"',
+            '  reports_dir: "reports"',
+            "analysis:",
+            "  target_groups:",
+            '    palestinians: ["palästinenser", "gaza"]',
+            "  framing_lexicons:",
+            '    dehumanizing: ["flut"]',
+            '    humanizing: ["mensch"]',
+            "  context_window_tokens: 5",
+            '  parser_model: "de_core_news_sm"',
+            "  outputs:",
+            '    sentence_features_path: "reports/sentence_representation_features.csv"',
+            '    article_group_features_path: "reports/article_group_representation_features.csv"',
+            "wefe:",
+            "  word_sets:",
+            '    target_group: ["palästinenser", "gaza"]',
+            '    negative_attrs: ["flut", "parasiten"]',
+            '    positive_attrs: ["mensch", "gemeinschaft"]',
+            "  experiments:",
+            "    wefat_test:",
+            '      metric: "WEFAT"',
+            '      target_sets: ["target_group"]',
+            '      attribute_sets: ["negative_attrs", "positive_attrs"]',
+        ]
+    )
+
+
+class FakeKeyedVectorsWefat:
+    """KeyedVectors stub with controllable unit vectors for WEFAT testing."""
+
+    def __init__(self) -> None:
+        dim = 4
+        self._vecs: dict[str, np.ndarray] = {
+            "palästinenser": np.array([1.0, 0.0, 0.0, 0.0]),
+            "gaza": np.array([1.0, 0.0, 0.0, 0.0]),
+            "flut": np.array([1.0, 0.0, 0.0, 0.0]),
+            "parasiten": np.array([1.0, 0.0, 0.0, 0.0]),
+            "mensch": np.array([0.0, 1.0, 0.0, 0.0]),
+            "gemeinschaft": np.array([0.0, 1.0, 0.0, 0.0]),
+        }
+        self.key_to_index = {k: i for i, k in enumerate(self._vecs)}
+
+    def __getitem__(self, key: str) -> np.ndarray:
+        return self._vecs[key]
+
+
+def test_run_wefat_returns_positive_score_when_target_aligned_with_attr1(tmp_path: Path) -> None:
+    config_path = tmp_path / "project.yaml"
+    config_path.write_text(wefat_config_yaml(), encoding="utf-8")
+    config = ProjectConfig.from_yaml(config_path)
+
+    kv = FakeKeyedVectorsWefat()
+    result = run_wefat(config, "wefat_test", kv)
+
+    assert result["metric"] == "WEFAT"
+    assert result["experiment_name"] == "wefat_test"
+    assert result["result"] > 0, "Target words aligned with negative_attrs should give positive WEFAT score"
+    assert not isnan(result["effect_size"])
+
+
+def test_run_wefat_returns_nan_when_target_words_absent(tmp_path: Path) -> None:
+    config_path = tmp_path / "project.yaml"
+    config_path.write_text(wefat_config_yaml(), encoding="utf-8")
+    config = ProjectConfig.from_yaml(config_path)
+
+    class EmptyVocab:
+        key_to_index: dict = {}
+
+        def __getitem__(self, key: str) -> np.ndarray:  # pragma: no cover
+            raise KeyError(key)
+
+    result = run_wefat(config, "wefat_test", EmptyVocab())
+
+    assert isnan(result["result"])
+    assert isnan(result["effect_size"])
+
+
+def test_run_wefat_query_name_matches_single_target_set(tmp_path: Path) -> None:
+    config_path = tmp_path / "project.yaml"
+    config_path.write_text(wefat_config_yaml(), encoding="utf-8")
+    config = ProjectConfig.from_yaml(config_path)
+
+    kv = FakeKeyedVectorsWefat()
+    result = run_wefat(config, "wefat_test", kv)
+
+    assert "target_group" in result["query_name"]
+    assert "negative_attrs" in result["query_name"]
+    assert "positive_attrs" in result["query_name"]
 
 
 def test_inspect_vocab_cli_renders_missing_words(monkeypatch, tmp_path: Path) -> None:

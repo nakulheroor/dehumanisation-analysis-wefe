@@ -153,9 +153,11 @@ class WefeExperimentConfig(BaseModel):
     @field_validator("metric")
     @classmethod
     def validate_metric(cls, value: str) -> str:
-        cleaned = value.strip()
+        cleaned = value.strip().upper()
         if not cleaned:
             raise ValueError("WEFE experiment metric must not be empty.")
+        if cleaned not in {"WEAT", "WEFAT"}:
+            raise ValueError(f"Unsupported metric '{cleaned}'. Supported: WEAT, WEFAT.")
         return cleaned
 
     @field_validator("target_sets", "attribute_sets")
@@ -173,6 +175,11 @@ class WefeExperimentConfig(BaseModel):
                 raise ValueError("WEAT experiments must define exactly 2 target_sets.")
             if len(self.attribute_sets) != 2:
                 raise ValueError("WEAT experiments must define exactly 2 attribute_sets.")
+        elif self.metric.upper() == "WEFAT":
+            if len(self.target_sets) != 1:
+                raise ValueError("WEFAT experiments must define exactly 1 target_set.")
+            if len(self.attribute_sets) != 2:
+                raise ValueError("WEFAT experiments must define exactly 2 attribute_sets.")
         return self
 
 

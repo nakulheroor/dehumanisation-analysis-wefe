@@ -24,4 +24,5 @@ reports/*
 !reports/.gitkeep
 *.pyc
 .DS_Store
+.python-version
 
