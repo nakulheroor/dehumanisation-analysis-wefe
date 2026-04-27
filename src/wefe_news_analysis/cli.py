@@ -90,7 +90,7 @@ def inspect_vocab_command(
         present_words = ", ".join(report["present_words"]) if report["present_words"] else "-"
         missing_words = ", ".join(report["missing_words"]) if report["missing_words"] else "-"
         console.print(
-            f"[{report['set_name']}] present={len(report['present_words'])}/{report['total_words']} "
+            f"{report['set_name']}: present={len(report['present_words'])}/{report['total_words']} "
             f"missing={len(report['missing_words'])}/{report['total_words']} "
             f"missing_ratio={report['missing_ratio']:.2f}"
         )

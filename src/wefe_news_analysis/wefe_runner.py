@@ -50,11 +50,14 @@ def build_query(config: ProjectConfig, experiment_name: str | None = None) -> Qu
 
 def tokenize_corpus_for_embeddings(config: ProjectConfig) -> list[list[str]]:
     text_files = sorted(config.corpus.processed_text_dir.glob("*.txt"))
+    lowercase = config.preprocessing.lowercase
+    min_len = config.preprocessing.min_token_length
     sentences: list[list[str]] = []
     for text_path in text_files:
         content = text_path.read_text(encoding=config.corpus.default_encoding)
         for line in content.splitlines():
-            tokens = line.split()
+            raw_tokens = line.split()
+            tokens = [t.lower() if lowercase else t for t in raw_tokens if len(t) >= min_len]
             if tokens:
                 sentences.append(tokens)
     if not sentences:
@@ -204,16 +207,104 @@ def metric_factory():
     return WEAT()
 
 
+def run_wefat(
+    config: ProjectConfig,
+    experiment_key: str,
+    keyed_vectors: Any,
+) -> dict[str, Any]:
+    """Compute a WEFAT-style score for a single target set vs two attribute sets.
+
+    WEFAT (Word Embedding Fairness Association Test) measures the absolute
+    association of one target group with two competing attribute sets, giving an
+    effect size without requiring a second target group for comparison.
+
+    For each target word t present in the vocabulary:
+        association(t) = mean_cos(t, A1) - mean_cos(t, A2)
+    WEFAT score = mean(association) over all present target words.
+    Effect size  = WEFAT score / std(association) when std > 0.
+    """
+    experiment = config.wefe.experiments[experiment_key]
+    target_words = config.wefe.word_sets[experiment.target_sets[0]]
+    attr_words_1 = config.wefe.word_sets[experiment.attribute_sets[0]]
+    attr_words_2 = config.wefe.word_sets[experiment.attribute_sets[1]]
+    vocab = keyed_vectors.key_to_index
+
+    present_targets = [w for w in target_words if w in vocab]
+    present_a1 = [w for w in attr_words_1 if w in vocab]
+    present_a2 = [w for w in attr_words_2 if w in vocab]
+
+    missing_count = (
+        len([w for w in target_words if w not in vocab])
+        + len([w for w in attr_words_1 if w not in vocab])
+        + len([w for w in attr_words_2 if w not in vocab])
+    )
+
+    if not present_targets or not present_a1 or not present_a2:
+        return {
+            "query_name": (
+                f"{experiment.target_sets[0]} wrt "
+                f"{experiment.attribute_sets[0]} and {experiment.attribute_sets[1]}"
+            ),
+            "result": float("nan"),
+            "wefat_score": float("nan"),
+            "effect_size": float("nan"),
+            "p_value": float("nan"),
+            "experiment_name": experiment_key,
+            "metric": "WEFAT",
+            "embedding_model_name": config.embeddings.model_name,
+            "missing_word_count": missing_count,
+            "missing_words_summary": "",
+        }
+
+    target_vecs = np.array([keyed_vectors[w] for w in present_targets])
+    a1_vecs = np.array([keyed_vectors[w] for w in present_a1])
+    a2_vecs = np.array([keyed_vectors[w] for w in present_a2])
+
+    def _mean_cos(t_vec: np.ndarray, attr_vecs: np.ndarray) -> float:
+        t_norm = t_vec / (np.linalg.norm(t_vec) + 1e-10)
+        a_norms = attr_vecs / (np.linalg.norm(attr_vecs, axis=1, keepdims=True) + 1e-10)
+        return float(np.mean(a_norms @ t_norm))
+
+    associations = np.array([
+        _mean_cos(t_vec, a1_vecs) - _mean_cos(t_vec, a2_vecs)
+        for t_vec in target_vecs
+    ])
+
+    wefat_score = float(np.mean(associations))
+    std = float(np.std(associations))
+    effect_size = wefat_score / std if std > 0 else 0.0
+
+    return {
+        "query_name": (
+            f"{experiment.target_sets[0]} wrt "
+            f"{experiment.attribute_sets[0]} and {experiment.attribute_sets[1]}"
+        ),
+        "result": wefat_score,
+        "wefat_score": wefat_score,
+        "effect_size": effect_size,
+        "p_value": float("nan"),
+        "experiment_name": experiment_key,
+        "metric": "WEFAT",
+        "embedding_model_name": config.embeddings.model_name,
+        "missing_word_count": missing_count,
+        "missing_words_summary": "",
+    }
+
+
 def run_wefe(config: ProjectConfig, experiment_name: str | None = None) -> dict[str, Any]:
     experiment_key = resolve_experiment_name(config, experiment_name)
-    query = build_query(config, experiment_key)
+    experiment = config.wefe.experiments[experiment_key]
     keyed_vectors = load_embeddings(config)
+
+    if experiment.metric.upper() == "WEFAT":
+        return run_wefat(config, experiment_key, keyed_vectors)
+
+    query = build_query(config, experiment_key)
     vocabulary_summary = summarize_query_vocabulary(query, keyed_vectors)
     log_missing_query_words(experiment_key, config.embeddings.model_name, vocabulary_summary)
     model = wrap_model(keyed_vectors, config.embeddings.model_name)
     metric = metric_factory()
-    experiment = config.wefe.experiments[experiment_key]
-    result = metric.run_query(query, model, return_effect_size=True)
+    result = metric.run_query(query, model, return_effect_size=True, lost_vocabulary_threshold=0.5)
     result["experiment_name"] = experiment_key
     result["metric"] = experiment.metric
     result["embedding_model_name"] = config.embeddings.model_name

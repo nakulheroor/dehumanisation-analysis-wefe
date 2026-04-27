@@ -18,7 +18,7 @@ preprocessing:
   normalize_unicode: true
   lowercase: true
   collapse_whitespace: true
-  strip_punctuation: false
+  strip_punctuation: true
   strip_digits: false
   min_token_length: 2
   stopword_handling: "keep"
@@ -41,18 +41,40 @@ output:
 
 analysis:
   target_groups:
-    palestinian_journalists: ["palästinensische journalisten", "journalisten aus gaza", "medienarbeiter aus gaza"]
+    palestinians: ["palästinenser", "palästinensern", "palästinensische", "palästinensischen", "palästinensischer", "palästinenserinnen", "palästina", "gaza", "gazas", "gazastreifen", "gazastreifens"]
+    israelis: ["israel", "israelis", "israelische", "israelischen", "israelischer", "israels", "idf", "armee", "streitkräfte", "soldaten"]
+    palestinian_journalists: ["palästinensische journalisten", "palästinensischen journalisten", "palästinensischer journalist", "palästinensische journalistin", "journalisten in gaza", "journalist aus gaza", "journalisten aus gaza", "medienschaffende in gaza", "al-jazeera-journalist", "fotojournalisten aus gaza", "videojournalisten aus gaza"]
+    general_journalists: ["journalist", "journalistin", "journalisten", "journalistinnen", "reporter", "reporterin", "korrespondent", "korrespondentin", "korrespondenten", "medien", "presse", "redaktion", "redaktionen", "sender"]
+    foreign_journalists: ["ausländische journalisten", "ausländischen journalisten", "internationale reporter", "internationale journalisten", "westliche reporter", "westliche journalisten", "auslandspresse", "auslandskorrespondenten"]
+    media_institutions: ["medien", "redaktion", "redaktionen", "sender", "fernsehsender", "nachrichtensender", "agentur", "nachrichtenagentur", "büros", "al jazeera", "cnn", "bbc", "reuters", "ap"]
+    civilians: ["zivilisten", "zivilbevölkerung", "zivile", "zivilen", "bevölkerung", "familie", "familien", "angehörige", "kinder", "menschen", "bewohner"]
   framing_lexicons:
-    dehumanizing: ["flut", "welle", "plage", "parasiten", "ungeziefer", "invasion"]
-    criminalizing: ["illegal", "kriminalität", "kriminell", "bande", "bedrohung", "verdächtig"]
-    collectivizing: ["der feind", "die palästinenser", "die migranten", "feindvolk"]
-    erasure_of_civilian_status: ["hamas-nah", "nicht-zivilisten", "schutzschild"]
-    incitement_displacement: ["vertreiben", "umsiedeln", "zwangsumsiedlung"]
-    incitement_destruction: ["dem erdboden gleichmachen", "auslöschen", "vernichten"]
-    discrediting_journalists: ["terrorpropaganda", "hamas-sprachrohr", "falschmeldung"]
-    censorship_repression: ["einschüchterung", "zensur", "informationssperre", "zugangsverbot"]
-    victimizing: ["opfer", "schutzlos", "vertrieben", "leidend", "hilflos"]
-    humanizing: ["familie", "arbeiter", "gemeinschaft", "nachbar", "mensch", "menschen"]
+    dehumanizing: ["barbarisch", "bestialisch", "menschenverachtend", "menschenverachtenden", "brutal", "grausam", "horror", "gräuel", "monster", "unmenschlich", "flut", "welle"]
+    criminalizing: ["terrorist", "terroristen", "terrorgruppe", "terrororganisation", "terrormiliz", "miliz", "milizen", "islamistisch", "islamistische", "radikalislamisch", "verdächtig"]
+    collectivizing: ["die palästinenser", "alle palästinenser", "palästinensische bevölkerung", "bewaffnete gruppen", "andere bewaffnete gruppen", "terroristen der hamas", "palästinenserorganisationen", "feindvolk"]
+    erasure_of_civilian_status: ["terror-infrastruktur", "terroristen", "kämpfer", "bewaffnete gruppen", "milizionäre", "schutzschilde", "hamas-strukturen", "terrorumfeld"]
+    incitement_displacement: ["vertreiben", "vertrieben", "vertreibung", "evakuierung", "räumung", "flucht", "flüchtlinge", "flüchtlingslager", "sichere zone", "humanitäre zone"]
+    incitement_destruction: ["zerstören", "zerstört", "zerstörung", "vernichten", "vernichtet", "auslöschen", "ausgelöscht", "einebnen", "eliminieren", "bombardiert"]
+    discrediting_journalists: ["propaganda", "parteilichkeit", "ungenauigkeiten", "verzerrungen", "terrorsender", "hamas-sprachrohr", "falschinformationen", "inszeniert", "hetze", "sympathisanten"]
+    censorship_repression: ["zensur", "sendeverbot", "abschalten", "schließen", "beschlagnahmen", "blockieren", "verbot", "zugang", "einreise", "aussperren", "zum schweigen bringen", "kritische berichterstattung"]
+    victimizing: ["opfer", "getötet", "verletzt", "vertrieben", "zivilisten", "zivilbevölkerung", "familie", "kinder", "angehörige", "trümmer", "leid"]
+    humanizing: ["familie", "familien", "angehörige", "eltern", "kinder", "menschen", "bevölkerung", "zivilisten", "zivilbevölkerung", "bewohner", "journalisten", "medienschaffende"]
+    violence_positive: ["selbstverteidigung", "schutz", "sicherheit", "verteidigung", "abwehr", "opfer", "unbewaffnet", "zivilisten", "humanitäre"]
+    violence_negative: ["terroristen", "terrorist", "miliz", "milizen", "massaker", "ermordet", "getötet", "brutal", "barbarisch", "gewalttätig", "terror"]
+    ideology_positive: ["demokratisch", "demokratie", "liberal", "menschenrechte", "völkerrecht", "humanität", "rechtsstaat", "friedenslösung"]
+    ideology_negative: ["islamistisch", "islamistische", "islamistischen", "radikal", "radikale", "radikalislamische", "radikalislamischen", "extremistisch", "terroristisch", "fundamentalistisch", "miliz"]
+    active_voice: ["töten", "beschießen", "bombardieren", "angreifen", "blockieren", "schließen", "verhaften", "beschlagnahmen"]
+    passive_voice: ["getötet", "verletzt", "vertrieben", "festgenommen", "verhaftet", "geschlossen", "blockiert", "beschlagnahmt"]
+    language_of_death_direct: ["massaker", "ermordet", "erschossen", "tötung", "getötet"]
+    language_of_death_euphemistic: ["tot", "tote", "toten", "gestorben", "starb", "starben", "ums leben gekommen"]
+    adjectives_positive: ["humanitäre", "humanitären", "sicher", "sichere", "kritische", "wertvolle", "wichtige", "unabhängig", "gerecht"]
+    adjectives_negative: ["brutal", "grausam", "barbarisch", "radikal", "extrem", "gewalttätig", "einseitig", "parteiisch", "grauenhaft"]
+    political_legitimacy: ["staat", "staaten", "zweistaatenlösung", "existenzrecht", "staatsräson", "zuflucht", "flucht", "souverän"]
+    credibility_positive: ["beweise", "beweis", "beweismittel", "recherche", "recherchen", "dokumentation", "quellen", "unabhängig", "verifizieren", "dokumentiert"]
+    credibility_negative: ["angeblich", "mutmaßlich", "behauptet", "behaupten", "behauptung", "vorwurf", "vorwürfe", "unklar", "unbestätigt", "zweifel"]
+    emotion_trauma: ["trauma", "traumatisiert", "angst", "verzweiflung", "leid", "trauer", "krank", "nerven"]
+    journalist_professionalism_positive: ["journalismus", "berichterstattung", "recherche", "recherchen", "journalistische", "unabhängig", "dokumentation", "quellen", "reporter", "journalisten", "pressefreiheit"]
+    journalist_professionalism_negative: ["propaganda", "hetze", "parteilichkeit", "falschinformationen", "falsch", "inszeniert", "sympathisanten", "agenten", "terrorsender", "verzerrungen", "ungenauigkeiten"]
   context_window_tokens: 8
   parser_model: "de_core_news_sm"
   outputs:
@@ -61,38 +83,55 @@ analysis:
 
 wefe:
   word_sets:
-    palestinian_journalists: ["palästinensisch", "journalist", "journalisten", "reporter", "korrespondent", "presse", "medienarbeiter", "kamerateam"]
-    general_journalists: ["journalist", "journalisten", "reporter", "korrespondent", "redaktion", "presse", "medien", "auslandspresse"]
-    foreign_journalists: ["auslandsjournalisten", "auslandspresse", "auslandskorrespondenten", "ausländische", "reporter", "presse"]
-    palestinians: ["palästinenser", "palästinensern", "palästinensisch", "gaza", "gazastreifen", "gazaner"]
-    civilians: ["zivilisten", "bevölkerung", "familien", "anwohner", "kinder", "menschen"]
-    media_institutions: ["redaktion", "sender", "fernsehsender", "agentur", "nachrichtenbüro", "pressebüro", "medienhaus", "studio"]
-    media_infrastructure: ["studio", "kamera", "sender", "sendemast", "internet", "telefonnetz", "funknetz", "übertragung"]
-    family_members_of_journalists: ["angehörige", "familie", "familienmitglieder", "eltern", "kinder", "ehepartner", "verwandte"]
-    targeting_violence_terms: ["töten", "erschießen", "bombardieren", "angreifen", "beschuss", "verletzen", "verwunden", "verstümmeln"]
-    detention_disappearance_terms: ["festnehmen", "inhaftieren", "verhaften", "verschleppen", "verschwindenlassen", "haft", "gefangenschaft", "willkür"]
-    harassment_intimidation_terms: ["bedrohen", "einschüchtern", "belästigen", "schikanieren", "terrorisieren", "überwachen", "verfolgen", "drohen"]
-    infrastructure_destruction_terms: ["zerstören", "sprengen", "verwüsten", "durchsuchen", "plündern", "bombardieren", "razzia", "beschlagnahmen"]
-    telecom_disruption_terms: ["abschalten", "blockieren", "unterbrechen", "drosseln", "kappen", "stören", "sperren", "abschneiden"]
-    terrorist_labelling_terms: ["terrorist", "terroristen", "hamas-kämpfer", "hamasnah", "terrornah", "propagandist", "militant", "extremist"]
-    family_targeting_terms: ["angehörige", "familie", "familienmitglieder", "bedrohen", "töten", "einschüchtern", "bestrafen", "vergelten"]
-    exclusion_blackout_terms: ["aussperren", "ausweisen", "abweisen", "verweigern", "einreiseverbot", "zugangssperre", "nachrichtensperre", "abschottung"]
-    dehumanizing_terms: ["barbaren", "parasiten", "ungeziefer", "monster", "menschenmaterial", "welle", "flut", "plage"]
-    collectivizing_terms: ["feind", "feindvolk", "masse", "welle", "flut", "kollektivschuld", "gesamtheit", "block"]
-    erasure_civilian_status_terms: ["hamasnah", "terrorumfeld", "nichtzivilisten", "schutzschild", "mitschuldig", "feindvolk"]
-    criminalizing_terms: ["illegal", "kriminalität", "kriminell", "bande", "bedrohung", "verdächtig", "terrorverdacht", "sicherheitsrisiko"]
-    mass_displacement_terms: ["vertreiben", "umsiedeln", "deportieren", "verdrängen", "räumen", "transfer", "entvölkern", "evakuieren"]
-    destruction_gaza_terms: ["vernichten", "auslöschen", "einebnen", "plattmachen", "zerstören", "demolieren", "verwüsten", "ausradieren"]
-    editorial_line_terms: ["redaktionslinie", "leitlinie", "vorgabe", "sendelinie", "kampagne", "abgestimmt", "chefredaktion", "kommentariat"]
-    disinformation_terms: ["falschmeldung", "desinformation", "propaganda", "verleumdung", "delegitimierung", "diskreditierung", "lüge", "manipulation"]
-    genocide_incitement_terms: ["ausrotten", "vernichten", "auslöschen", "eliminieren", "tilgen", "restlos", "endlösung", "vertreiben"]
-    coded_incitement_terms: ["säubern", "ausmisten", "durchgreifen", "befrieden", "räumen", "abschrecken", "ordnung", "härte"]
-    censorship_retaliation_terms: ["zensur", "sendesperre", "verbot", "entlassung", "sanktion", "repressalie", "strafen", "einschüchterung"]
-    press_freedom_terms: ["pressefreiheit", "schutz", "unabhängigkeit", "berichterstattung", "journalismus", "dokumentation", "zeugen", "öffentlichkeit"]
-    editorial_independence_terms: ["redaktionsfreiheit", "unabhängigkeit", "sorgfalt", "faktenprüfung", "transparenz", "ethik", "quellenprüfung", "korrektur"]
-    civilian_protection_terms: ["zivilisten", "schutz", "völkerrecht", "humanitär", "menschenrechte", "rettung", "versorgung", "sicherheit"]
-    legal_accountability_terms: ["völkerrecht", "ermittlung", "beweise", "verantwortung", "haftung", "rechtsbruch", "kriegsverbrechen", "anordnung"]
-    humanizing_terms: ["familie", "arbeiter", "gemeinschaft", "nachbar", "mensch", "menschen", "zivilisten", "bewohner"]
+    palestinian_journalists: ["palästinenser", "palästinensische", "palästinensischen", "gaza", "gazastreifen", "journalist", "journalisten", "journalistin", "journalistinnen", "reporter", "reportern", "fotografen", "medienschaffende", "kameramann", "presse"]
+    general_journalists: ["journalist", "journalisten", "journalistin", "journalistinnen", "reporter", "reportern", "korrespondenten", "medien", "redaktion", "redaktionen", "presse", "sender", "fernsehsender", "nachrichtensender", "journalismus", "berichterstattung", "recherche", "recherchen"]
+    foreign_journalists: ["ausländische", "ausländischen", "ausländischer", "internationale", "internationalen", "internationaler", "westliche", "westlichen", "westlicher", "journalisten", "reporter", "korrespondenten", "presse"]
+    palestinians: ["palästinenser", "palästinensern", "palästinensische", "palästinensischen", "palästinensischer", "palästinenserinnen", "palästina", "gaza", "gazas", "gazastreifen", "gazastreifens"]
+    israelis: ["israel", "israelis", "israelische", "israelischen", "israelischer", "israels", "idf", "armee", "soldaten", "streitkräfte", "regierung"]
+    civilians: ["zivilisten", "zivilbevölkerung", "zivile", "zivilen", "bevölkerung", "familie", "familien", "angehörige", "kinder", "menschen", "bewohner"]
+    media_institutions: ["medien", "redaktion", "redaktionen", "sender", "fernsehsender", "nachrichtensender", "agentur", "nachrichtenagentur", "reuters", "ap", "cnn", "bbc", "büros"]
+    media_infrastructure: ["kamera", "kameras", "ausrüstung", "sender", "büros", "webseiten", "signal", "internet", "übertragung", "studio", "kanal"]
+    family_members_of_journalists: ["familie", "familien", "familienmitglieder", "angehörige", "eltern", "kinder", "geschwister", "tochter", "sohn", "enkel"]
+    targeting_violence_terms: ["angriff", "angriffe", "luftangriff", "luftangriffe", "drohnenangriff", "raketenangriff", "beschuss", "getötet", "ermordet", "massaker", "verletzt", "verletzte", "tötung", "schuss"]
+    detention_disappearance_terms: ["festgenommen", "festnahme", "festnahmen", "verhaftet", "inhaftiert", "verschleppt", "verschleppung", "entführt", "entführung", "geisel", "geiseln", "gefangenschaft", "haft", "haftbefehl", "haftbefehle"]
+    harassment_intimidation_terms: ["bedroht", "bedrohen", "bedrohung", "bedrohungen", "drohen", "droht", "drohung", "drohungen", "einschüchtern", "einschüchterung", "überwacht", "überwachen", "verfolgt", "verfolgen", "terrorisieren"]
+    infrastructure_destruction_terms: ["zerstört", "zerstören", "zerstörung", "zerstörungen", "bombardiert", "bombardieren", "beschlagnahmt", "beschlagnahmen", "durchsucht", "durchsuchen", "razzia", "verwüstet"]
+    telecom_disruption_terms: ["blockiert", "blockieren", "unterbrochen", "unterbrechen", "abschalten", "abschneiden", "abgeschnitten", "gesperrt", "sperren", "internet", "signal", "übertragung", "webseiten"]
+    terrorist_labelling_terms: ["terrorist", "terroristen", "terroristische", "terroristischen", "terrorgruppe", "terrorgruppen", "terrororganisation", "terrororganisationen", "terrormiliz", "miliz", "milizen", "islamistische", "radikalislamische", "terror"]
+    family_targeting_terms: ["familie", "familien", "familienmitglieder", "angehörige", "eltern", "kinder", "geschwister", "tochter", "sohn", "enkel", "getötet", "bedroht", "visier"]
+    exclusion_blackout_terms: ["sendeverbot", "verbot", "verbote", "abschalten", "schließen", "büros", "beschlagnahmen", "blockieren", "webseiten", "zugang", "einreise", "sperren", "abschottung", "schweigen", "schließen"]
+    dehumanizing_terms: ["barbarisch", "bestialisch", "menschenverachtend", "menschenverachtenden", "brutal", "grausam", "gräuel", "horror", "monster", "unmenschlich", "welle", "flut"]
+    collectivizing_terms: ["palästinenser", "palästinensern", "bevölkerung", "gruppen", "organisationen", "einheiten", "milizen", "terroristen"]
+    erasure_civilian_status_terms: ["terroristen", "kämpfer", "kämpfern", "bewaffnete", "bewaffneten", "milizionäre", "milizionären", "infrastruktur", "hamas", "strukturen"]
+    criminalizing_terms: ["terrorist", "terroristen", "terroristische", "terroristischen", "terrorgruppe", "terrororganisation", "terrormiliz", "miliz", "milizen", "islamistische", "islamistischen", "radikalislamische", "radikalislamischen", "verdächtig"]
+    mass_displacement_terms: ["vertreiben", "vertrieben", "vertreibung", "flucht", "flüchtlinge", "flüchtlingslager", "evakuierung", "räumung", "räumen", "sichere", "zone", "humanitäre", "humanitären"]
+    destruction_gaza_terms: ["zerstört", "zerstören", "zerstörung", "vernichten", "vernichtet", "auslöschen", "ausgelöscht", "einebnen", "eliminieren", "verwüstet", "bombardiert"]
+    editorial_line_terms: ["redaktion", "redaktionen", "kommentar", "kommentare", "linie", "leitlinie", "vorgabe", "vorgaben", "kampagne", "kampagnen", "abgestimmt", "meinung"]
+    disinformation_terms: ["angeblich", "mutmaßlich", "behauptet", "behaupten", "behauptung", "vorwurf", "vorwürfe", "propaganda", "falsch", "falsche", "falschinformationen", "verzerrungen", "ungenauigkeiten", "parteilichkeit", "inszeniert", "lügen"]
+    genocide_incitement_terms: ["völkermord", "vernichten", "auslöschen", "ausrotten", "eliminieren", "tilgen", "endlösung"]
+    coded_incitement_terms: ["ordnung", "härte", "hart", "harten", "durchgreifen", "befrieden", "säubern", "räumen"]
+    censorship_retaliation_terms: ["zensur", "sendeverbot", "verbot", "verbote", "abschalten", "schließen", "beschlagnahmen", "blockieren", "schweigen", "behindern", "kritische", "berichterstattung", "zugang"]
+    press_freedom_terms: ["unabhängig", "unabhängige", "unabhängigen", "unabhängigkeit", "berichterstattung", "journalismus", "recherche", "recherchen", "quellen", "dokumentation", "pressefreiheit", "reporter", "journalisten", "öffentlichkeit"]
+    editorial_independence_terms: ["unabhängig", "unabhängige", "unabhängigen", "unabhängigkeit", "recherche", "recherchen", "quellen", "faktencheck", "faktenchecks", "dokumentation", "journalistische", "berichterstattung", "journalismus"]
+    civilian_protection_terms: ["zivilisten", "zivilbevölkerung", "menschenrechte", "völkerrecht", "schutz", "sicherheit", "humanitäre", "humanitären", "familie", "kinder", "bevölkerung", "zivile"]
+    legal_accountability_terms: ["völkerrecht", "völkerrechtlich", "kriegsverbrechen", "ermittlungen", "ermittler", "staatsanwaltschaft", "beweise", "beweis", "beweismittel", "verantwortung", "völkerstrafgesetzbuch", "haftbefehl", "haftbefehle"]
+    humanizing_terms: ["familie", "familien", "angehörige", "eltern", "kinder", "menschen", "bevölkerung", "zivilisten", "zivilbevölkerung", "bewohner", "journalisten", "medienschaffende"]
+    violence_positive_terms: ["selbstverteidigung", "schutz", "sicherheit", "verteidigung", "abwehr", "opfer", "zivilisten", "humanitäre", "humanitären"]
+    violence_negative_terms: ["terroristen", "terrorist", "miliz", "milizen", "massaker", "ermordet", "getötet", "brutal", "barbarisch", "gewalttätig", "terror"]
+    ideology_positive_terms: ["demokratie", "demokratisch", "liberal", "humanität", "menschenrechte", "völkerrecht", "rechtsstaat", "friedenslösung"]
+    ideology_negative_terms: ["islamistisch", "islamistische", "islamistischen", "radikal", "radikale", "radikalislamische", "radikalislamischen", "extremistisch", "terroristisch", "fundamentalistisch", "miliz"]
+    active_voice_terms: ["töten", "beschießen", "bombardieren", "angreifen", "blockieren", "schließen", "verhaften", "beschlagnahmen"]
+    passive_voice_terms: ["getötet", "verletzt", "vertrieben", "festgenommen", "verhaftet", "geschlossen", "blockiert", "beschlagnahmt"]
+    language_of_death_direct_terms: ["massaker", "ermordet", "erschossen", "tötung", "getötet"]
+    language_of_death_euphemistic_terms: ["tot", "tote", "toten", "gestorben", "starb", "starben", "leben"]
+    adjectives_positive_terms: ["humanitäre", "humanitären", "sicher", "sichere", "kritische", "wertvolle", "wichtige", "unabhängig", "gerecht"]
+    adjectives_negative_terms: ["brutal", "grausam", "barbarisch", "radikal", "extrem", "gewalttätig", "einseitig", "parteiisch", "grauenhaft"]
+    political_legitimacy_terms: ["staat", "staaten", "zweistaatenlösung", "existenzrecht", "staatsräson", "zuflucht", "flucht", "souverän"]
+    credibility_positive_terms: ["beweise", "beweis", "beweismittel", "recherche", "recherchen", "dokumentation", "quellen", "unabhängig", "verifizieren", "dokumentiert"]
+    credibility_negative_terms: ["angeblich", "mutmaßlich", "behauptet", "behaupten", "behauptung", "vorwurf", "vorwürfe", "unklar", "anzweifeln", "zweifel"]
+    trauma_terms: ["trauma", "traumatisiert", "krank", "angst", "verzweiflung", "leiden", "leid", "trauer", "nerven"]
+    journalist_professionalism_terms: ["journalismus", "berichterstattung", "recherche", "recherchen", "journalistische", "unabhängig", "dokumentation", "quellen", "reporter", "journalisten", "pressefreiheit"]
+    journalist_discrediting_terms: ["propaganda", "hetze", "parteilichkeit", "falschinformationen", "falsch", "inszeniert", "sympathisanten", "agenten", "terrorsender", "verzerrungen", "ungenauigkeiten"]
   experiments:
     journalist_targeting_violence:
       metric: "WEAT"
@@ -179,3 +218,58 @@ wefe:
       description: "Vergleicht palästinensische Referenzen mit zivilen Referenzen unter Vokabular rechtlicher Verantwortlichkeit versus Desinformationsvokabular."
       target_sets: ["palestinians", "civilians"]
       attribute_sets: ["legal_accountability_terms", "disinformation_terms"]
+    israel_palestine_violence_framing:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische und israelische Referenzen unter negativem Gewalt- versus Schutz- und Verteidigungsvokabular."
+      target_sets: ["palestinians", "israelis"]
+      attribute_sets: ["violence_negative_terms", "violence_positive_terms"]
+    israel_palestine_credibility_framing:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische und israelische Referenzen unter skeptischem versus evidenzorientiertem Glaubwürdigkeitsvokabular."
+      target_sets: ["palestinians", "israelis"]
+      attribute_sets: ["credibility_negative_terms", "credibility_positive_terms"]
+    israel_palestine_death_language:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische und israelische Referenzen unter euphemistischem versus direktem Todesvokabular."
+      target_sets: ["palestinians", "israelis"]
+      attribute_sets: ["language_of_death_euphemistic_terms", "language_of_death_direct_terms"]
+    journalist_professionalism_contestation:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische Journalistinnen und Journalisten mit allgemeinen journalistischen Referenzen unter Diskreditierungs- versus Professionalitätsvokabular."
+      target_sets: ["palestinian_journalists", "general_journalists"]
+      attribute_sets: ["journalist_discrediting_terms", "journalist_professionalism_terms"]
+    journalist_access_exclusion_parity:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische mit ausländischen Journalistinnen und Journalisten unter Ausschluss- versus Pressefreiheitsvokabular – prüft, ob der Zugangsausschluss unterschiedlich dargestellt wird."
+      target_sets: ["palestinian_journalists", "foreign_journalists"]
+      attribute_sets: ["exclusion_blackout_terms", "press_freedom_terms"]
+    wefat_palestinians_dehumanization_absolute:
+      metric: "WEFAT"
+      description: "Misst die absolute Assoziation palästinensischer Begriffe mit entmenschlichendem gegenüber humanisierendem Vokabular – ohne Vergleichsgruppe."
+      target_sets: ["palestinians"]
+      attribute_sets: ["dehumanizing_terms", "humanizing_terms"]
+    wefat_palestinian_journalists_violence_absolute:
+      metric: "WEFAT"
+      description: "Misst die absolute Assoziation palästinensischer Journalist*innen-Begriffe mit Gewalt- und Verfolgungsvokabular gegenüber Pressefreiheitsvokabular."
+      target_sets: ["palestinian_journalists"]
+      attribute_sets: ["targeting_violence_terms", "press_freedom_terms"]
+    wefat_genocide_incitement_absolute:
+      metric: "WEFAT"
+      description: "Misst die absolute Assoziation palästinensischer Begriffe mit direktem Vernichtungsvokabular gegenüber zivilem Schutzvokabular."
+      target_sets: ["palestinians"]
+      attribute_sets: ["genocide_incitement_terms", "civilian_protection_terms"]
+    wefat_mass_displacement_absolute:
+      metric: "WEFAT"
+      description: "Misst die absolute Assoziation palästinensischer Begriffe mit Vertreibungsvokabular gegenüber zivilem Schutzvokabular."
+      target_sets: ["palestinians"]
+      attribute_sets: ["mass_displacement_terms", "civilian_protection_terms"]
+    wefat_media_institutions_destruction_absolute:
+      metric: "WEFAT"
+      description: "Misst die absolute Assoziation von Medieninstitutionsbegriffen mit Infrastrukturzerstörungs- gegenüber Pressefreiheitsvokabular."
+      target_sets: ["media_institutions"]
+      attribute_sets: ["infrastructure_destruction_terms", "press_freedom_terms"]
+    wefat_civilians_erasure_absolute:
+      metric: "WEFAT"
+      description: "Misst die absolute Assoziation ziviler Referenzbegriffe mit Vokabular zur Aberkennung des Zivilstatus gegenüber humanisierendem Vokabular."
+      target_sets: ["civilians"]
+      attribute_sets: ["erasure_civilian_status_terms", "humanizing_terms"]
