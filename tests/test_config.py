@@ -296,3 +296,184 @@ def test_project_yaml_covers_all_special_rapporteur_question_areas() -> None:
 
     # 5. Disinformation against journalists
     assert any("disinformation" in n for n in exp_names)
+
+
+# ---------------------------------------------------------------------------
+# Tests for the new WEAT-AS (Additional Scenarios) experiments
+# ---------------------------------------------------------------------------
+
+
+def test_project_yaml_has_conviction_accusation_word_sets() -> None:
+    """Conviction and guilt vocabulary must be present for journalist framing tests."""
+    config = ProjectConfig.from_yaml(Path("configs/project.yaml"))
+
+    assert "conviction_accusation_terms" in config.wefe.word_sets
+    assert "innocence_protection_terms" in config.wefe.word_sets
+    # Core accusation terms derived from SZ corpus
+    assert "schuldig" in config.wefe.word_sets["conviction_accusation_terms"]
+    assert "verdacht" in config.wefe.word_sets["conviction_accusation_terms"]
+    assert "angeklagt" in config.wefe.word_sets["conviction_accusation_terms"]
+    assert "unschuldig" in config.wefe.word_sets["innocence_protection_terms"]
+
+
+def test_project_yaml_has_hamas_organization_word_set() -> None:
+    """Hamas/terrorist-organisation vocabulary must be present for Hamas-association test."""
+    config = ProjectConfig.from_yaml(Path("configs/project.yaml"))
+
+    assert "hamas_organization_terms" in config.wefe.word_sets
+    assert "hamas" in config.wefe.word_sets["hamas_organization_terms"]
+    assert "islamist" in config.wefe.word_sets["hamas_organization_terms"]
+    assert len(config.wefe.word_sets["hamas_organization_terms"]) >= 8
+
+
+def test_project_yaml_has_death_agency_word_sets() -> None:
+    """Passive and active death vocabulary must be present for death-language asymmetry test."""
+    config = ProjectConfig.from_yaml(Path("configs/project.yaml"))
+
+    assert "passive_death_terms" in config.wefe.word_sets
+    assert "active_murder_terms" in config.wefe.word_sets
+    # Passive: agentless death vocabulary used for Palestinian casualties in SZ
+    assert "gestorben" in config.wefe.word_sets["passive_death_terms"]
+    assert "starben" in config.wefe.word_sets["passive_death_terms"]
+    # Active: direct murder vocabulary used for October 7 Israeli victims
+    assert "ermordet" in config.wefe.word_sets["active_murder_terms"]
+    assert "massaker" in config.wefe.word_sets["active_murder_terms"]
+
+
+def test_project_yaml_has_victim_humanization_word_sets() -> None:
+    """Sympathetic and statistical vocabulary must be present for victim-humanization test."""
+    config = ProjectConfig.from_yaml(Path("configs/project.yaml"))
+
+    assert "sympathetic_victim_terms" in config.wefe.word_sets
+    assert "statistical_aggregate_terms" in config.wefe.word_sets
+    assert "trauer" in config.wefe.word_sets["sympathetic_victim_terms"]
+    assert "geisel" in config.wefe.word_sets["sympathetic_victim_terms"]
+    assert "zahlen" in config.wefe.word_sets["statistical_aggregate_terms"]
+
+
+def test_project_yaml_has_dehumanizing_aggressive_word_sets() -> None:
+    """Dehumanizing/aggressive and humanizing child/civilian vocabulary must be present."""
+    config = ProjectConfig.from_yaml(Path("configs/project.yaml"))
+
+    assert "dehumanizing_aggressive_terms" in config.wefe.word_sets
+    assert "humanizing_child_civilian_terms" in config.wefe.word_sets
+    assert "barbarisch" in config.wefe.word_sets["dehumanizing_aggressive_terms"]
+    assert "bestialisch" in config.wefe.word_sets["dehumanizing_aggressive_terms"]
+    assert "kind" in config.wefe.word_sets["humanizing_child_civilian_terms"]
+    assert "kinder" in config.wefe.word_sets["humanizing_child_civilian_terms"]
+    assert "minderjähriger" in config.wefe.word_sets["humanizing_child_civilian_terms"]
+
+
+def test_project_yaml_has_journalist_conviction_experiment() -> None:
+    """Palestinian journalists must be tested against conviction/guilt vocabulary."""
+    config = ProjectConfig.from_yaml(Path("configs/project.yaml"))
+
+    assert "journalist_conviction_association" in config.wefe.experiments
+    exp = config.wefe.experiments["journalist_conviction_association"]
+    assert exp.metric == "WEAT"
+    assert "palestinian_journalists" in exp.target_sets
+    assert "general_journalists" in exp.target_sets
+    assert "conviction_accusation_terms" in exp.attribute_sets
+    assert "innocence_protection_terms" in exp.attribute_sets
+
+
+def test_project_yaml_has_journalist_hamas_experiment() -> None:
+    """Palestinian journalists must be tested against Hamas-organisation vocabulary."""
+    config = ProjectConfig.from_yaml(Path("configs/project.yaml"))
+
+    assert "journalist_hamas_association" in config.wefe.experiments
+    exp = config.wefe.experiments["journalist_hamas_association"]
+    assert exp.metric == "WEAT"
+    assert "palestinian_journalists" in exp.target_sets
+    assert "hamas_organization_terms" in exp.attribute_sets
+    assert "press_freedom_terms" in exp.attribute_sets
+
+
+def test_project_yaml_has_death_language_agency_experiment() -> None:
+    """Death-language agency asymmetry must compare Palestinians vs. Israelis."""
+    config = ProjectConfig.from_yaml(Path("configs/project.yaml"))
+
+    assert "death_language_agency_asymmetry" in config.wefe.experiments
+    exp = config.wefe.experiments["death_language_agency_asymmetry"]
+    assert exp.metric == "WEAT"
+    assert "palestinians" in exp.target_sets
+    assert "israelis" in exp.target_sets
+    assert "passive_death_terms" in exp.attribute_sets
+    assert "active_murder_terms" in exp.attribute_sets
+
+
+def test_project_yaml_has_victim_humanization_experiment() -> None:
+    """Victim humanization test must compare Israelis vs. Palestinians."""
+    config = ProjectConfig.from_yaml(Path("configs/project.yaml"))
+
+    assert "victim_humanization_sympathy_asymmetry" in config.wefe.experiments
+    exp = config.wefe.experiments["victim_humanization_sympathy_asymmetry"]
+    assert exp.metric == "WEAT"
+    assert "israelis" in exp.target_sets
+    assert "palestinians" in exp.target_sets
+    assert "sympathetic_victim_terms" in exp.attribute_sets
+    assert "statistical_aggregate_terms" in exp.attribute_sets
+
+
+def test_project_yaml_has_civilian_dehumanization_experiment() -> None:
+    """Civilian dehumanization test must compare Palestinians vs. Israelis."""
+    config = ProjectConfig.from_yaml(Path("configs/project.yaml"))
+
+    assert "civilian_dehumanization_asymmetry" in config.wefe.experiments
+    exp = config.wefe.experiments["civilian_dehumanization_asymmetry"]
+    assert exp.metric == "WEAT"
+    assert "palestinians" in exp.target_sets
+    assert "israelis" in exp.target_sets
+    assert "dehumanizing_aggressive_terms" in exp.attribute_sets
+    assert "humanizing_child_civilian_terms" in exp.attribute_sets
+
+
+def test_project_yaml_has_journalist_dehumanization_experiment() -> None:
+    """Journalist dehumanization test must compare Palestinian vs. general journalists."""
+    config = ProjectConfig.from_yaml(Path("configs/project.yaml"))
+
+    assert "journalist_dehumanization_asymmetry" in config.wefe.experiments
+    exp = config.wefe.experiments["journalist_dehumanization_asymmetry"]
+    assert exp.metric == "WEAT"
+    assert "palestinian_journalists" in exp.target_sets
+    assert "general_journalists" in exp.target_sets
+    assert "dehumanizing_aggressive_terms" in exp.attribute_sets
+
+
+def test_project_yaml_covers_all_new_research_hypotheses() -> None:
+    """All five new WEAT-AS hypotheses must be represented as experiments."""
+    config = ProjectConfig.from_yaml(Path("configs/project.yaml"))
+    exp_names = set(config.wefe.experiments.keys())
+
+    # H1: Palestinian journalists embedded in conviction/guilt discourse
+    assert "journalist_conviction_association" in exp_names
+
+    # H2: Palestinian journalists associated with Hamas/terrorist organisations
+    assert "journalist_hamas_association" in exp_names
+
+    # H3: Palestinian deaths described with passive vocabulary; Israeli deaths with active murder terms
+    assert "death_language_agency_asymmetry" in exp_names
+
+    # H4: Israeli victims receive sympathetic/humanising framing; Palestinian deaths treated statistically
+    assert "victim_humanization_sympathy_asymmetry" in exp_names
+
+    # H5: Dehumanising/aggressive vocabulary more associated with Palestinians than Israelis
+    assert "civilian_dehumanization_asymmetry" in exp_names
+    assert "journalist_dehumanization_asymmetry" in exp_names
+
+
+def test_new_experiments_all_have_descriptions() -> None:
+    """All new WEAT-AS experiments must carry a non-empty description."""
+    config = ProjectConfig.from_yaml(Path("configs/project.yaml"))
+    new_experiments = [
+        "journalist_conviction_association",
+        "journalist_hamas_association",
+        "death_language_agency_asymmetry",
+        "victim_humanization_sympathy_asymmetry",
+        "civilian_dehumanization_asymmetry",
+        "journalist_dehumanization_asymmetry",
+    ]
+    for name in new_experiments:
+        exp = config.wefe.experiments[name]
+        assert exp.description, f"Experiment '{name}' is missing a description"
+        assert len(exp.description) > 20, f"Experiment '{name}' description is too short"

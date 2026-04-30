@@ -119,6 +119,22 @@ wefe:
     trauma_terms: ["trauma", "traumatisiert"]
     journalist_professionalism_terms: ["objektiv", "neutral", "professionell", "unabhängig", "unabhängigkeit", "akkurat", "korrekt", "genau"]
     journalist_discrediting_terms: ["propagandist", "propaganda", "agent", "kollaborateur", "sympathisant", "gestellt", "inszeniert", "arrangiert", "jihad", "desinformation", "verleumdung"]
+    # --- New word sets for conviction/guilt, Hamas association, death-agency, victim-humanization, dehumanization ---
+    conviction_accusation_terms: ["schuldig", "verdacht", "verdächtig", "beschuldigt", "angeklagt", "anklage", "vorwurf", "vorwürfe", "verurteilt", "verurteilung", "haftbefehl", "inhaftiert", "festgenommen", "verhaftet", "verhört", "geständnis", "terrorverdacht", "komplize", "komplizenschaft", "mitschuld", "mitschuldig", "tatvorwurf", "ermittlungen", "beschuldigung", "eingeweiht", "informiert"]
+    innocence_protection_terms: ["unschuldig", "freigesprochen", "entlastet", "rehabilitiert", "zeuge", "berichterstatter", "professionell", "unabhängig", "objektiv", "quellenarbeit", "recherche", "sorgfalt", "wahrheit", "korrekt", "transparent", "rechtschutz", "opferstatus", "schutzwürdig", "journalistische"]
+    hamas_organization_terms: ["hamas", "dschihadist", "islamist", "islamismus", "jihad", "milizionär", "terrororganisation", "terrorgruppe", "extremist", "fundamentalist", "dschihadismus", "salafist", "islamischer", "hamas-führer", "bewaffnet", "kombattant", "kriegspartei", "waffenarm", "hamas-kämpfer"]
+    passive_death_terms: ["gestorben", "starben", "starb", "todesfälle", "verstorben", "umgekommen", "sterben", "sterbend", "gefallen", "ableben", "tot", "todesfall", "ums leben"]
+    active_murder_terms: ["ermordet", "erschossen", "erschlagen", "abgeschlachtet", "hingerichtet", "massakriert", "umgebracht", "mord", "massaker", "kaltblütig", "mordete", "blutbad", "hingemetzelt", "mordanschlag", "exekutiert", "liquidiert"]
+    sympathetic_victim_terms: ["trauern", "trauer", "trauerfeier", "beileid", "vermisst", "entführt", "geisel", "geiseln", "überlebende", "überlebt", "gedenken", "gedenkfeier", "held", "schicksal", "einzelschicksal", "mutter", "vater", "tochter", "sohn", "erinnerung", "persönlich", "herzensbrecher", "angehörige", "familienangehörige"]
+    statistical_aggregate_terms: ["todesfälle", "opferzahl", "gesamtzahl", "bilanz", "schätzungen", "hochrechnung", "daten", "zahlen", "statistik", "insgesamt", "prozent", "laut", "angaben", "anzahl", "zähler", "berichten", "zahl"]
+    dehumanizing_aggressive_terms: ["barbarisch", "barbarei", "bestialisch", "unmenschlich", "bestie", "bestien", "fanatisch", "blutrünstig", "gräueltat", "gräueltaten", "schrecken", "horror", "grauenhaft", "abscheulich", "verabscheuungswürdig", "brutal", "brutalität", "barbar", "barbaren", "unmensch", "tierisch", "mordlust", "monströs", "gräuel"]
+    humanizing_child_civilian_terms: ["kind", "kinder", "kleinkind", "baby", "mädchen", "junge", "jugendlicher", "jugendliche", "minderjähriger", "minderjährige", "schüler", "schülerin", "teenager", "heranwachsend", "schutzlos", "hilflos", "eltern", "unschuldige", "zivilist", "zivilisten", "neugeborene", "säugling"]
+    # --- Hostage/prisoner framing asymmetry ---
+    hostage_sympathy_terms: ["geisel", "geiseln", "geiselnahme", "entführt", "entführte", "verschleppt", "verschleppte", "freilassung", "befreit", "freigelassen", "verschleppung", "geiselhaft", "geiselkrise", "lebenszeichen"]
+    prisoner_detention_neutral_terms: ["häftling", "häftlinge", "gefangene", "gefangener", "gefangenschaft", "inhaftiert", "inhaftierte", "verhaftete", "inhaftierung", "haftstrafe", "gefängnis", "verwaltungshaft"]
+    # --- Self-defense vs. terror-attack framing ---
+    self_defense_terms: ["selbstverteidigung", "verteidigungsrecht", "verteidigungsmaßnahme", "notwehr", "abwehrkampf", "gegenwehr", "sicherheitsoperation", "legitim", "rechtmäßig", "verhältnismäßig"]
+    terror_attack_terms: ["terrorangriff", "terrorakt", "überfall", "blutbad", "massenmord", "attentat", "terroroffensive", "eindringen", "terrorwelle", "terroristisch", "anschlag", "mordanschlag"]
   experiments:
     journalist_targeting_violence:
       metric: "WEAT"
@@ -233,6 +249,52 @@ wefe:
       description: "Vergleicht palästinensische mit ausländischen Journalistinnen und Journalisten unter Ausschluss- und Sperrvokabular versus Pressefreiheitsvokabular – testet, ob palästinensische Journalist*innen stärker mit Zugangsausschluss assoziiert werden."
       target_sets: ["palestinian_journalists", "foreign_journalists"]
       attribute_sets: ["exclusion_blackout_terms", "press_freedom_terms"]
+    # --- NEW: Conviction, guilt, and Hamas-association framing of Palestinian journalists ---
+    journalist_conviction_association:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische Journalistinnen und Journalisten mit allgemeinen journalistischen Referenzen unter Verurteilungs- und Anschuldigungsvokabular versus Unschulds- und Professionalitätsvokabular – testet, ob palästinensische Journalisten in ein Rahmen des Schuldig-Seins eingebettet werden."
+      target_sets: ["palestinian_journalists", "general_journalists"]
+      attribute_sets: ["conviction_accusation_terms", "innocence_protection_terms"]
+    journalist_hamas_association:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische Journalistinnen und Journalisten mit allgemeinen journalistischen Referenzen unter Hamas- und Terrororganisationsvokabular versus Pressefreiheitsvokabular – testet, ob palästinensische Journalisten mit Hamas und Terrorismus assoziiert werden."
+      target_sets: ["palestinian_journalists", "general_journalists"]
+      attribute_sets: ["hamas_organization_terms", "press_freedom_terms"]
+    # --- NEW: Death-language agency asymmetry (passive Palestinian deaths vs. active Israeli murders) ---
+    death_language_agency_asymmetry:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische mit israelischen Referenzen unter passiver/euphemistischer Todessprache versus aktiver Mord- und Tötungssprache – testet, ob palästinensische Todesfälle sprachlich handlungsarm (gestorben, starben) und israelische Todesfälle handlungsreich (ermordet, Massaker) dargestellt werden."
+      target_sets: ["palestinians", "israelis"]
+      attribute_sets: ["passive_death_terms", "active_murder_terms"]
+    # --- NEW: Victim humanization and sympathy asymmetry (Israeli victims humanized, Palestinian deaths statisticized) ---
+    victim_humanization_sympathy_asymmetry:
+      metric: "WEAT"
+      description: "Vergleicht israelische mit palästinensischen Referenzen unter empathischem Trauer- und Humanisierungsvokabular versus statistisch-aggregiertem Opfervokabular – testet, ob israelische Opfer personalisiert und humanisiert werden, während palästinensische Todesfälle als Zahlen erscheinen."
+      target_sets: ["israelis", "palestinians"]
+      attribute_sets: ["sympathetic_victim_terms", "statistical_aggregate_terms"]
+    # --- NEW: Dehumanizing/aggressive terms more associated with Palestinian civilians than humanizing child terms ---
+    civilian_dehumanization_asymmetry:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische mit israelischen Referenzen unter entmenschlichendem und aggressivem Vokabular (barbarisch, bestialisch) versus humanisierendem Kind- und Zivilschutzvokabular – testet, ob palästinensische Referenzen stärker in entmenschlichende Sprache eingebettet sind."
+      target_sets: ["palestinians", "israelis"]
+      attribute_sets: ["dehumanizing_aggressive_terms", "humanizing_child_civilian_terms"]
+    journalist_dehumanization_asymmetry:
+      metric: "WEAT"
+      description: "Vergleicht palästinensische Journalistinnen und Journalisten mit allgemeinen journalistischen Referenzen unter entmenschlichendem und aggressivem Vokabular versus humanisierendem Kind- und Zivilschutzvokabular – testet, ob palästinensische Journalisten in entmenschlichendem Kontext erscheinen."
+      target_sets: ["palestinian_journalists", "general_journalists"]
+      attribute_sets: ["dehumanizing_aggressive_terms", "humanizing_child_civilian_terms"]
+    # --- NEW: Hostage/prisoner vocabulary asymmetry (Israeli captives as Geiseln vs. Palestinian detainees as Häftlinge) ---
+    hostage_prisoner_framing:
+      metric: "WEAT"
+      description: "Vergleicht israelische mit palästinensischen Referenzen unter Geisel- und Entführungsvokabular versus Häftlings- und Gefangenschaftsvokabular – testet, ob israelische Gefangene mit empathischem Geisel-Vokabular assoziiert werden, während palästinensische Gefangene neutral als Häftlinge erscheinen."
+      target_sets: ["israelis", "palestinians"]
+      attribute_sets: ["hostage_sympathy_terms", "prisoner_detention_neutral_terms"]
+    # --- NEW: Self-defense vs. terror-attack framing asymmetry ---
+    self_defense_vs_terror_framing:
+      metric: "WEAT"
+      description: "Vergleicht israelische mit palästinensischen Referenzen unter Selbstverteidigungs- und Abwehrvokabular versus Terrorangriff- und Massenmordvokabular – testet, ob israelische Aktionen als Selbstverteidigung und palästinensische Aktionen als Terror gerahmt werden."
+      target_sets: ["israelis", "palestinians"]
+      attribute_sets: ["self_defense_terms", "terror_attack_terms"]
     # --- WEFAT: absolute single-group associations ---
     wefat_palestinians_dehumanization_absolute:
       metric: "WEFAT"
